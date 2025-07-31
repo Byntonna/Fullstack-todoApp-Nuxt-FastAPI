@@ -115,6 +115,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { Tabs } from "~/components/ui/tabs"
+import { toast } from 'vue-sonner'
 import { ScrollArea } from "~/components/ui/scroll-area"
 import { SelectTrigger, SelectItem, SelectValue, SelectContent, Select } from "~/components/ui/select"
 import { useTodosStore } from '~/stores/todos'
@@ -216,5 +217,6 @@ function onDateChange(info: any) {
 
 function exportCsv() {
   todosStore.exportCsv(filteredTodos.value)
+  toast('Файл .csv с планами успешно загружен')
 }
 </script>

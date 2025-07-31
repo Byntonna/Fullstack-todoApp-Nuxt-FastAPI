@@ -123,11 +123,10 @@ const onSubmit = form.handleSubmit((values) => {
           <ToggleGroup
             type="single"
             aria-label="Выберите приоритет"
-            class="flex gap-2"
             :disabled="props.loading"
             v-bind="componentField"
           >
-            <ToggleGroupItem value="P1">
+            <ToggleGroupItem value="P1" class="rounded-l-md">
               <div class="-space-x-4">
                 <Icon name="tabler:exclamation-mark"
                     size="20"
@@ -150,7 +149,7 @@ const onSubmit = form.handleSubmit((values) => {
                     style="color: black"/>
               </div>
             </ToggleGroupItem>
-            <ToggleGroupItem value="P3">
+            <ToggleGroupItem value="P3" class="rounded-r-md">
                 <Icon name="tabler:exclamation-mark"
                     size="20"
                     style="color: black"/>
