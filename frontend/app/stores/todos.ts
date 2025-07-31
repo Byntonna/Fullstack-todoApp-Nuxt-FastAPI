@@ -103,7 +103,7 @@ export const useTodosStore = defineStore('todos', {
       }
     },
 
-    async createTodo(title: string, description?: string) {
+    async createTodo(title: string, description?: string, priority: 'P1' | 'P2' | 'P3' = 'P3', due_date?: string | null) {
       try {
         const authStore = useAuthStore()
         const config = useRuntimeConfig()
@@ -115,7 +115,7 @@ export const useTodosStore = defineStore('todos', {
             Authorization: `Bearer ${authStore.token}`,
             'Content-Type': 'application/json'
           },
-          body: { title, description }
+          body: { title, description, priority, due_date }
         })
 
         this.todos.unshift(newTodo) // Добавляем в начало списка
@@ -126,7 +126,7 @@ export const useTodosStore = defineStore('todos', {
       }
     },
 
-    async updateTodo(id: number, updates: Partial<Pick<Todo, 'title' | 'description' | 'completed'>>) {
+    async updateTodo(id: number, updates: Partial<Pick<Todo, 'title' | 'description' | 'completed' | 'priority' | 'due_date'>>) {
       try {
         const authStore = useAuthStore()
         const config = useRuntimeConfig()
