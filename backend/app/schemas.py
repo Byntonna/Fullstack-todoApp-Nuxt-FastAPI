@@ -1,13 +1,16 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional, List
 
 from pydantic import BaseModel, EmailStr
+from .models import Priority
 
 
 # Схемы для задачника
 class TodoBase(BaseModel):
     title: str
     description: Optional[str] = None
+    priority: Priority = Priority.P3
+    due_date: Optional[date] = None
 
 class TodoCreate(TodoBase):
     pass
@@ -16,6 +19,8 @@ class TodoUpdate(TodoBase):
     title: Optional[str] = None
     description: Optional[str] = None
     completed: Optional[bool] = None
+    priority: Optional[Priority] = None
+    due_date: Optional[date] = None
 
 class Todo(TodoBase):
     id: int
@@ -25,6 +30,7 @@ class Todo(TodoBase):
     updated_at: Optional[datetime] = None
 
     class Config:
+        orm_mode = True
         from_attributes = True
 
 

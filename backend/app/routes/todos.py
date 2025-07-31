@@ -49,7 +49,7 @@ async def update_todo(
 
     return db_todo
 
-@router.delete("/", response_model=schemas.Todo)
+@router.delete("/{todo_id}", response_model=schemas.Todo)
 async def delete_todo(
         todo_id: int,
         user_id: schemas.User = Depends(auth.get_current_user),

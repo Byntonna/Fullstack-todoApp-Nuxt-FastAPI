@@ -1,7 +1,7 @@
 // stores/todos.ts - Store для управления задачами
 import { defineStore } from 'pinia'
 
-interface Todo {
+export interface Todo {
   id: number
   title: string
   description?: string
@@ -9,6 +9,8 @@ interface Todo {
   user_id: number
   created_at: string
   updated_at?: string
+  due_date?: string
+  priority?: 'P1' | 'P2' | 'P3'
 }
 
 interface TodoState {
@@ -27,7 +29,53 @@ export const useTodosStore = defineStore('todos', {
   getters: {
     completedTodos: (state) => state.todos.filter(todo => todo.completed),
     incompleteTodos: (state) => state.todos.filter(todo => !todo.completed),
-    totalTodos: (state) => state.todos.length
+    totalTodos: (state) => state.todos.length,
+
+    // Новый геттер: фильтрация + сортировка
+    filterAndSort: (state) => {
+      return ({query = '', priority = [], sort = 'due' as 'due' | 'created' | 'priority'}) => {
+        let result = [...state.todos];
+
+        // Поиск по title и description (регистр нечувствителен)
+        if (query.trim()) {
+          const q = query.toLowerCase();
+          result = result.filter(t =>
+              t.title.toLowerCase().includes(q) ||
+              (t.description?.toLowerCase().includes(q))
+          );
+        }
+
+        // Фильтрация по приоритету (если в todo есть поле priority)
+        if (priority.length > 0) {
+          result = result.filter(t => {
+            // Если у задачи нет priority, исключаем; предполагается, что в todo есть поле priority: 'P1' | 'P2' | 'P3'
+            // Если структура другая — адаптируйте
+            return priority.includes((t as any).priority);
+          });
+        }
+
+        // Сортировка
+        result.sort((a, b) => {
+          if (sort === 'due') {
+            const da = (a as any).due_date ? new Date((a as any).due_date).getTime() : Infinity;
+            const db = (b as any).due_date ? new Date((b as any).due_date).getTime() : Infinity;
+            return da - db;
+          }
+          if (sort === 'created') {
+            return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          }
+          if (sort === 'priority') {
+            const order = {P1: 1, P2: 2, P3: 3};
+            const pa = order[((a as any).priority || 'P3') as keyof typeof order] ?? 99;
+            const pb = order[((b as any).priority || 'P3') as keyof typeof order] ?? 99;
+            return pa - pb;
+          }
+          return 0;
+        });
+
+        return result;
+      }
+    }
   },
 
   actions: {
