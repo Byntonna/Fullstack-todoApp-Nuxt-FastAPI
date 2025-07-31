@@ -19,12 +19,28 @@
         </h3>
 
         <!-- Бейдж приоритета -->
-        <span
-          v-if="todo.priority"
-          :class="['px-2 py-0.5 rounded-full text-xs font-semibold uppercase', priorityClasses[todo.priority]]"
-        >
-          {{ todo.priority }}
-        </span>
+        <div v-if="todo.priority" class="flex items-center">
+          <template v-if="todo.priority === 'P3'">
+            <div class="flex items-center bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 rounded-full px-2">
+              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
+            </div>
+          </template>
+
+          <template v-else-if="todo.priority === 'P2'">
+            <div class="flex items-center -space-x-4 bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 rounded-full px-2">
+              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
+              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
+            </div>
+          </template>
+
+          <template v-else-if="todo.priority === 'P1'">
+            <div class="flex items-center -space-x-4 bg-red-100 dark:bg-red-900/40 dark:text-red-300 rounded-full px-2">
+              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
+              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
+              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
+            </div>
+          </template>
+        </div>
       </div>
 
       <!-- Описание -->
@@ -77,10 +93,6 @@ import { useTodosStore } from '~/stores/todos'
 import { Checkbox } from '~/components/ui/checkbox'
 import type { Todo } from '~/stores/todos'
 
-/**
- * Расширяем тип Todo, чтобы не падало,
- * если store ещё не содержит новые поля
- */
 interface TodoExtended extends Todo {
   priority?: 'P1' | 'P2' | 'P3'
   due_date?: string | null
@@ -95,12 +107,6 @@ defineEmits<{
 
 const todosStore = useTodosStore()
 const isToggling = ref(false)
-
-const priorityClasses: Record<'P1' | 'P2' | 'P3', string> = {
-  P1: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
-  P2: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
-  P3: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
-}
 
 const isOverdue = computed(() => {
   if (!todo.due_date || todo.completed) return false

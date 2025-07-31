@@ -43,7 +43,7 @@ const formSchema = toTypedSchema(
   z.object({
     title:       z.string().min(1, 'Название обязательно'),
     description: z.string().optional(),
-    priority:    z.enum(['P1', 'P2', 'P3']),
+    priority:    z.enum(['P1', 'P2', 'P3']).default('P3'),
     // «date» валидируется как строка ISO-формата «YYYY-MM-DD»
     due_date:    z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   })
@@ -123,13 +123,37 @@ const onSubmit = form.handleSubmit((values) => {
           <ToggleGroup
             type="single"
             aria-label="Выберите приоритет"
-            class="flex gap-2"
             :disabled="props.loading"
             v-bind="componentField"
           >
-            <ToggleGroupItem value="P1">P1</ToggleGroupItem>
-            <ToggleGroupItem value="P2">P2</ToggleGroupItem>
-            <ToggleGroupItem value="P3">P3</ToggleGroupItem>
+            <ToggleGroupItem value="P1" class="rounded-l-md">
+              <div class="-space-x-4">
+                <Icon name="tabler:exclamation-mark"
+                    size="20"
+                    style="color: black"/>
+              <Icon name="tabler:exclamation-mark"
+                    size="20"
+                    style="color: black"/>
+              <Icon name="tabler:exclamation-mark"
+                    size="20"
+                    style="color: black"/>
+              </div>
+            </ToggleGroupItem>
+            <ToggleGroupItem value="P2">
+              <div class="-space-x-4">
+                <Icon name="tabler:exclamation-mark"
+                    size="20"
+                    style="color: black"/>
+              <Icon name="tabler:exclamation-mark"
+                    size="20"
+                    style="color: black"/>
+              </div>
+            </ToggleGroupItem>
+            <ToggleGroupItem value="P3" class="rounded-r-md">
+                <Icon name="tabler:exclamation-mark"
+                    size="20"
+                    style="color: black"/>
+            </ToggleGroupItem>
           </ToggleGroup>
         </FormControl>
         <FormMessage/>

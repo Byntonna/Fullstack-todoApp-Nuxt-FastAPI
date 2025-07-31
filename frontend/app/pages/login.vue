@@ -39,6 +39,7 @@ onMounted(() => {
     <div>
       <h2 class="sr-only">Login page</h2>
       <LoginForm
+        class="max-w-2xl"
         :loading="loading"
         :error="error"
         @login="onLogin"

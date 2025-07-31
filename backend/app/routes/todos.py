@@ -60,4 +60,4 @@ async def delete_todo(
     if todo_delete is None:
         raise HTTPException(status_code=404, detail="Todo not found")
 
-    return {"message": "Todo is deleted successfully"}
+    return todo_delete

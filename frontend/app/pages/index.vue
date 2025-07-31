@@ -2,12 +2,13 @@
   <div class="space-y-8">
     <!-- Заголовок + счётчики -->
     <section>
-      <h1 class="text-3xl font-bold tracking-tight">Мои задачи</h1>
-      <p class="text-sm text-muted-foreground">
+      <h1 class="text-3xl font-bold tracking-tight">{{ greeting }}</h1>
+      <p class="text-sm text-muted-foreground mt-3">
         Всего — {{ todosStore.totalTodos }},
         выполнено — {{ todosStore.completedTodos.length }},
         осталось — {{ todosStore.incompleteTodos.length }}
       </p>
+      <Button class="mt-4" @click="openCreate">Добавить задачу</Button>
     </section>
 
     <!-- Фильтры / сортировка -->
@@ -39,15 +40,14 @@
       </div>
     </Card>
 
-    <!-- Создание / редактирование задачи -->
-    <Card>
+    <Modal v-model="showForm">
       <TodoForm
         :editing-todo="editingTodo"
         :loading="formLoading"
         @submit="handleSubmit"
         @cancel="cancelEdit"
       />
-    </Card>
+    </Modal>
 
     <!-- Переключатель видов -->
     <Tabs default-value="list" v-model="view">
@@ -72,6 +72,7 @@
               :key="todo.id"
               :todo="todo"
               @edit="startEdit"
+              @delete="deleteTodo"
             />
           </TransitionGroup>
         </ScrollArea>
@@ -79,12 +80,27 @@
 
       <!-- Календарь -->
       <TabsContent value="calendar">
-        <Calendar
-          :events="calendarEvents"
-          editable
-          droppable
-          @event-drop="onDateChange"
-        />
+        <div class="flex flex-col gap-4 md:flex-row">
+          <Calendar
+            v-model="selectedDate"
+            :events="calendarEvents"
+            editable
+            droppable
+            @event-drop="onDateChange"
+          />
+          <ScrollArea class="md:w-full md:h-auto h-64 space-y-4">
+            <p v-if="selectedTodos.length === 0" class="text-center text-muted-foreground py-12">
+              Задач на выбранную дату нет
+            </p>
+            <TodoItem
+              v-for="todo in selectedTodos"
+              :key="todo.id"
+              :todo="todo"
+              @edit="startEdit"
+              @delete="deleteTodo"
+            />
+          </ScrollArea>
+        </div>
       </TabsContent>
     </Tabs>
 
@@ -97,10 +113,14 @@
 </template>
 
 <script setup lang="ts">
-import {Tabs} from "~/components/ui/tabs";
-import {ScrollArea} from "~/components/ui/scroll-area";
-import {SelectTrigger, SelectItem, SelectValue, SelectContent, Select} from "~/components/ui/select"
-import {useTodosStore} from '~/stores/todos'
+import { ref, computed, onMounted } from 'vue'
+import { Tabs } from "~/components/ui/tabs"
+import { toast } from 'vue-sonner'
+import { ScrollArea } from "~/components/ui/scroll-area"
+import { SelectTrigger, SelectItem, SelectValue, SelectContent, Select } from "~/components/ui/select"
+import { useTodosStore } from '~/stores/todos'
+import type { Todo } from '~/stores/todos'
+import Modal from '@/components/Modal.vue'
 
 const todosStore = useTodosStore()
 
@@ -113,6 +133,8 @@ const sort      = ref<'due' | 'created' | 'priority'>('due')
 const view      = ref<'list' | 'calendar'>('list')
 const editingTodo = ref<Todo | null>(null);
 const formLoading = ref(false)
+const showForm = ref(false)
+const selectedDate = ref<Date | null>(null)
 
 /**
  * вычисления
@@ -128,6 +150,24 @@ const calendarEvents = computed(() =>
     allDay: true
   }))
 )
+const selectedTodos = computed(() =>
+  filteredTodos.value.filter(t => {
+    if (!selectedDate.value || !t.due_date) return false
+    return new Date(t.due_date).toDateString() === new Date(selectedDate.value).toDateString()
+  })
+)
+
+const greeting = computed(() => {
+  const hour = new Date().getHours()
+  if (hour > 0 || hour < 5) return 'Доброй ночи'
+  if (hour < 12) return 'Доброе утро'
+  if (hour < 18) return 'Добрый день'
+  return 'Добрый вечер'
+})
+
+onMounted(() => {
+  todosStore.fetchTodos()
+})
 
 /**
  * методы
@@ -138,18 +178,26 @@ function resetFilters() {
   sort.value = 'due'
 }
 
-function startEdit(todo: Todo) {
-  editingTodo.value = todo
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+function openCreate() {
+  editingTodo.value = null
+  showForm.value = true
 }
 
-async function handleSubmit(data: { title: string; description?: string }) {
+function startEdit(todo: Todo) {
+  editingTodo.value = todo
+  showForm.value = true
+}
+
+async function handleSubmit(data: { title: string; description?: string; priority: 'P1' | 'P2' | 'P3'; due_date?: string | null }) {
   formLoading.value = true
   try {
     const result = editingTodo.value
       ? await todosStore.updateTodo(editingTodo.value.id, data)
-      : await todosStore.createTodo(data.title, data.description)
-    if (result.success) editingTodo.value = null
+      : await todosStore.createTodo(data.title, data.description, data.priority, data.due_date)
+    if (result.success) {
+      editingTodo.value = null
+      showForm.value = false
+    }
   } finally {
     formLoading.value = false
   }
@@ -157,6 +205,11 @@ async function handleSubmit(data: { title: string; description?: string }) {
 
 function cancelEdit() {
   editingTodo.value = null
+  showForm.value = false
+}
+
+async function deleteTodo(id: number) {
+  await todosStore.deleteTodo(id)
 }
 
 function onDateChange(info: any) {
@@ -165,5 +218,6 @@ function onDateChange(info: any) {
 
 function exportCsv() {
   todosStore.exportCsv(filteredTodos.value)
+  toast('Файл .csv с планами успешно загружен')
 }
 </script>

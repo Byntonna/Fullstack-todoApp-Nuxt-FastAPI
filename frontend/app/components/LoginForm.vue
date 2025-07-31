@@ -22,7 +22,7 @@ const password = ref('')
 
 function onSubmit(event: Event) {
   event.preventDefault()
-  emit('login', { email: email.value, password: password.value })
+  emit('login', { email: email.value.toLowerCase(), password: password.value })
 }
 </script>
 

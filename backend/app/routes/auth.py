@@ -10,18 +10,27 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 
 @router.post("/register", response_model=schemas.User)
 async def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, email=str(user.email))
+    db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    return crud.create_user(db=db, user=user)
+        raise HTTPException(
+            status_code=409,  # Conflict вместо 400
+            detail=f"Пользователь с email {user.email} уже зарегистрирован. Попробуйте войти в систему или используйте другой email."
+        )
+    try:
+        return crud.create_user(db=db, user=user)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail="Произошла ошибка при создании аккаунта. Попробуйте еще раз."
+        )
 
 @router.post("/login", response_model=schemas.Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = crud.authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
-            status_code=400,
-            detail="Incorrect email or password",
+            status_code=401,
+            detail="Неверный логин или пароль",
             headers={"WWW-Authenticate": "Bearer"}
         )
     access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
