@@ -20,7 +20,13 @@ async function onRegister({ email, password }: { email: string; password: string
     await authStore.register(email, password)
     router.push('/')
   } catch (err: any) {
-    error.value = err?.data?.detail || err.message || 'Ошибка регистрации'
+    if (err?.status === 409) {
+      error.value = `Email ${email} уже используется. Попробуйте войти или используйте другой email.`
+    } else if (err?.status === 422) {
+      error.value = 'Проверьте правильность введенных данных'
+    } else {
+      error.value = err?.data?.detail || err.message || 'Не удалось создать аккаунт. Попробуйте еще раз.'
+    }
   } finally {
     loading.value = false
   }
@@ -38,6 +44,7 @@ onMounted(() => {
     <div>
       <h2 class="sr-only">Registration page</h2>
       <RegisterForm
+        class="max-w-lg"
         :loading="loading"
         :error="error"
         @register="onRegister"

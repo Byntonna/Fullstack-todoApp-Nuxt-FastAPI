@@ -20,15 +20,28 @@ const emit = defineEmits<{
 
 const email = ref('')
 const password = ref('')
+const passwordConfirm = ref('')
+const passwordsMatch = computed(() => password.value === passwordConfirm.value)
+const showMismatchError = computed(() => passwordConfirm.value !== '' && !passwordsMatch.value)
+
+// можно дополнительно предотвратить отправку если пустые
+const canSubmit = computed(() => {
+  return !props.loading &&
+    email.value.trim() !== '' &&
+    password.value !== '' &&
+    passwordConfirm.value !== '' &&
+    passwordsMatch.value
+})
 
 function onSubmit() {
-  emit('register', { email: email.value, password: password.value })
+  if (!canSubmit.value) return
+  emit('register', { email: email.value.toLowerCase(), password: password.value })
 }
 </script>
 
 <template>
   <div :class="cn('flex flex-col gap-6', props.class)">
-    <Card class="overflow-hidden p-0">
+    <Card class="overflow-hidden p-0 max-w-sm">
       <CardContent class="p-6 md:p-8">
         <form @submit.prevent="onSubmit" class="space-y-6">
           <div class="flex flex-col items-center text-center">
@@ -43,8 +56,8 @@ function onSubmit() {
             <Label for="email">Email</Label>
             <Input
               id="email"
-              type="email"
               v-model="email"
+              type="email"
               autocomplete="email"
               required
               class="mt-3"
@@ -54,12 +67,27 @@ function onSubmit() {
             <Label for="password">Пароль</Label>
             <Input
               id="password"
-              type="password"
               v-model="password"
+              type="password"
               autocomplete="new-password"
               required
               class="mt-3"
             />
+          </div>
+          <div>
+            <Label for="password-confirm">Повторите пароль</Label>
+            <Input
+              id="password-confirm"
+              v-model="passwordConfirm"
+              type="password"
+              autocomplete="new-password"
+              required
+              class="mt-3"
+              :aria-invalid="showMismatchError ? 'true' : 'false'"
+            />
+            <p v-if="showMismatchError" class="text-sm text-red-600 mt-1">
+              Пароли не совпадают.
+            </p>
           </div>
 
           <p v-if="props.error" class="text-sm text-red-600">
@@ -69,9 +97,9 @@ function onSubmit() {
           <Button
             type="submit"
             class="w-full"
-            :disabled="props.loading"
+            :disabled="props.loading || !passwordsMatch"
           >
-            <span v-if="props.loading" class="animate-spin inline-block w-4 h-4 border-2 rounded-full border-current border-t-transparent"></span>
+            <span v-if="props.loading" class="animate-spin inline-block w-4 h-4 border-2 rounded-full border-current border-t-transparent"/>
             <span v-else>Зарегистрироваться</span>
           </Button>
 
