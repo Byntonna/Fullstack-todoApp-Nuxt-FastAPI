@@ -127,9 +127,34 @@ const onSubmit = form.handleSubmit((values) => {
             :disabled="props.loading"
             v-bind="componentField"
           >
-            <ToggleGroupItem value="P1">P1</ToggleGroupItem>
-            <ToggleGroupItem value="P2">P2</ToggleGroupItem>
-            <ToggleGroupItem value="P3">P3</ToggleGroupItem>
+            <ToggleGroupItem value="P1">
+              <div class="-space-x-4">
+                <Icon name="tabler:exclamation-mark"
+                    size="20"
+                    style="color: black"/>
+              <Icon name="tabler:exclamation-mark"
+                    size="20"
+                    style="color: black"/>
+              <Icon name="tabler:exclamation-mark"
+                    size="20"
+                    style="color: black"/>
+              </div>
+            </ToggleGroupItem>
+            <ToggleGroupItem value="P2">
+              <div class="-space-x-4">
+                <Icon name="tabler:exclamation-mark"
+                    size="20"
+                    style="color: black"/>
+              <Icon name="tabler:exclamation-mark"
+                    size="20"
+                    style="color: black"/>
+              </div>
+            </ToggleGroupItem>
+            <ToggleGroupItem value="P3">
+                <Icon name="tabler:exclamation-mark"
+                    size="20"
+                    style="color: black"/>
+            </ToggleGroupItem>
           </ToggleGroup>
         </FormControl>
         <FormMessage/>
