@@ -80,12 +80,27 @@
 
       <!-- Календарь -->
       <TabsContent value="calendar">
-        <Calendar
-          :events="calendarEvents"
-          editable
-          droppable
-          @event-drop="onDateChange"
-        />
+        <div class="flex flex-col gap-4 md:flex-row">
+          <Calendar
+            v-model="selectedDate"
+            :events="calendarEvents"
+            editable
+            droppable
+            @event-drop="onDateChange"
+          />
+          <ScrollArea class="md:w-full md:h-auto h-64 space-y-4">
+            <p v-if="selectedTodos.length === 0" class="text-center text-muted-foreground py-12">
+              Задач на выбранную дату нет
+            </p>
+            <TodoItem
+              v-for="todo in selectedTodos"
+              :key="todo.id"
+              :todo="todo"
+              @edit="startEdit"
+              @delete="deleteTodo"
+            />
+          </ScrollArea>
+        </div>
       </TabsContent>
     </Tabs>
 
@@ -118,6 +133,7 @@ const view      = ref<'list' | 'calendar'>('list')
 const editingTodo = ref<Todo | null>(null);
 const formLoading = ref(false)
 const showForm = ref(false)
+const selectedDate = ref<Date | null>(null)
 
 /**
  * вычисления
@@ -132,6 +148,12 @@ const calendarEvents = computed(() =>
     start: t.due_date,
     allDay: true
   }))
+)
+const selectedTodos = computed(() =>
+  filteredTodos.value.filter(t => {
+    if (!selectedDate.value || !t.due_date) return false
+    return new Date(t.due_date).toDateString() === new Date(selectedDate.value).toDateString()
+  })
 )
 
 const greeting = computed(() => {
