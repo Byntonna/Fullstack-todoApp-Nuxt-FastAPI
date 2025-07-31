@@ -69,7 +69,7 @@ todo-fullstack/
 git clone https://github.com/byntonna/Fullstack-todoApp-Nuxt-FastAPI.git
 cd Fullstack-todoApp-Nuxt-FastAPI
 ```
-### 2. Запуск с Docker (рекомендуется)
+### 2. Запуск с Docker (НЕ РАБОТАЕТ)
 ```bash
 docker-compose up -d
 
