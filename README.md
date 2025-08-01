@@ -1,4 +1,5 @@
 ![readme.png](readme.png)
+![readme2.png](readme2.png)
 # Todo Fullstack App
 Современное fullstack приложение для управления задачами, построенное с использованием Nuxt v4, FastAPI
 и PostgreSQL.
