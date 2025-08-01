@@ -17,6 +17,7 @@ export default defineNuxtConfig({
     '@nuxt/image',
     'shadcn-nuxt',
     '@pinia/nuxt',
+    '@nuxtjs/color-mode'
   ],
   shadcn: {
     prefix: '',
@@ -27,6 +28,10 @@ export default defineNuxtConfig({
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8000'
     }
+  },
+
+  colorMode: {
+    classSuffix: ''
   },
 
   ssr: true

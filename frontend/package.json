@@ -37,6 +37,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@nuxtjs/color-mode": "^3.5.2",
     "@types/crypto-js": "^4.2.2"
   }
 }
