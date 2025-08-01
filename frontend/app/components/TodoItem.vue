@@ -74,14 +74,14 @@
         variant="ghost"
         @click="$emit('edit', todo)"
       >
-        <Icon name="solar:pen-new-square-outline" size="20" style="color: currentColor"/>
+        <Icon name="radix-icons:pencil-1" size="20" style="color: currentColor"/>
       </Button>
       <Button
         size="sm"
         variant="ghost"
         @click="$emit('delete', todo.id)"
       >
-        <Icon name="solar:trash-bin-minimalistic-2-outline" size="20" style="color: red" />
+        <Icon name="radix-icons:trash" size="20" style="color: red" />
       </Button>
     </div>
   </div>
