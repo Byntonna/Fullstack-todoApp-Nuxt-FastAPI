@@ -4,6 +4,7 @@ definePageMeta({ layout: false })
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '~/stores/auth'
+import { useI18n } from '#imports'
 import RegisterForm from '@/components/RegisterForm.vue'
 
 const authStore = useAuthStore()
@@ -11,6 +12,7 @@ const router = useRouter()
 
 const loading = ref(false)
 const error = ref('')
+const { t } = useI18n()
 
 async function onRegister({ email, password }: { email: string; password: string }) {
   loading.value = true
@@ -21,11 +23,11 @@ async function onRegister({ email, password }: { email: string; password: string
     router.push('/')
   } catch (err: any) {
     if (err?.status === 409) {
-      error.value = `Email ${email} уже используется. Попробуйте войти или используйте другой email.`
+      error.value = t('register.email_used', { email })
     } else if (err?.status === 422) {
-      error.value = 'Проверьте правильность введенных данных'
+      error.value = t('register.invalid_data')
     } else {
-      error.value = err?.data?.detail || err.message || 'Не удалось создать аккаунт. Попробуйте еще раз.'
+      error.value = err?.data?.detail || err.message || t('register.failed')
     }
   } finally {
     loading.value = false

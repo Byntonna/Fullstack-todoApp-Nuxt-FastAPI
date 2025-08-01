@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useI18n } from '#imports'
 
 const props = defineProps<{
   loading: boolean
@@ -19,6 +20,7 @@ const emit = defineEmits<{
 
 const email = ref('')
 const password = ref('')
+const { t } = useI18n()
 
 function onSubmit(event: Event) {
   event.preventDefault()
@@ -34,10 +36,10 @@ function onSubmit(event: Event) {
           <div class="flex flex-col gap-6">
             <div class="flex flex-col items-center text-center">
               <h1 class="text-2xl font-bold">
-                Добро пожаловать
+                {{ t('login.welcome') }}
               </h1>
               <p class="text-muted-foreground text-balance">
-                Войдите в свою учетную запись
+                {{ t('login.signin_to_account') }}
               </p>
             </div>
 
@@ -58,12 +60,12 @@ function onSubmit(event: Event) {
             </div>
             <div class="grid gap-3">
               <div class="flex items-center">
-                <Label for="password">Пароль</Label>
+                <Label for="password">{{ t('login.password') }}</Label>
                 <a
                   href="#"
                   class="ml-auto text-sm underline-offset-2 hover:underline"
                 >
-                  Забыли пароль?
+                  {{ t('login.forgot_password') }}
                 </a>
               </div>
               <Input
@@ -76,12 +78,12 @@ function onSubmit(event: Event) {
             </div>
             <Button type="submit" class="w-full" :disabled="props.loading">
               <span v-if="props.loading" class="animate-spin inline-block w-4 h-4 border-2 rounded-full border-current border-t-transparent"></span>
-              <span v-else>Войти</span>
+              <span v-else>{{ t('login.sign_in') }}</span>
             </Button>
             <div class="text-center text-sm">
-              Нет аккаунта?
+              {{ t('login.no_account') }}
               <NuxtLink to="/register" class="underline underline-offset-4">
-                Зарегистрироваться
+                {{ t('login.sign_up') }}
               </NuxtLink>
             </div>
           </div>
@@ -96,9 +98,11 @@ function onSubmit(event: Event) {
         </div>
       </CardContent>
     </Card>
-    <div class="max-w-2/3 text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-      Нажимая «Продолжить», вы соглашаетесь с нашими <a href="#">Условиями обслуживания</a>
-      и <a href="#">Политикой конфиденциальности</a>.
+    <div class="max-w-2/3 text-muted-foreground text-center text-xs text-balance">
+      <i18n-t keypath="login.agree_terms" tag="span">
+        <a href="#" class="underline hover:text-primary">{{ t('login.terms_of_service') }}</a>
+        <a href="#" class="underline hover:text-primary">{{ t('login.privacy_policy') }}</a>
+      </i18n-t>
     </div>
   </div>
 </template>

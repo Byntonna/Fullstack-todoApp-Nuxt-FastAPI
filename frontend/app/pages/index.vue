@@ -4,18 +4,16 @@
     <section>
       <h1 class="text-3xl font-bold tracking-tight">{{ greeting }}</h1>
       <p class="text-sm text-muted-foreground mt-3">
-        Всего — {{ todosStore.totalTodos }},
-        выполнено — {{ todosStore.completedTodos.length }},
-        осталось — {{ todosStore.incompleteTodos.length }}
+        {{ t('todo.stats', { total: todosStore.totalTodos, completed: todosStore.completedTodos.length, remaining: todosStore.incompleteTodos.length }) }}
       </p>
-      <Button class="mt-4" @click="openCreate">Добавить задачу</Button>
+      <Button class="mt-4" @click="openCreate">{{ t('todo.add') }}</Button>
     </section>
 
     <!-- Фильтры / сортировка -->
     <Card class="p-4">
       <div class="flex flex-wrap gap-4 items-end">
         <!-- Поиск -->
-        <Input v-model="query" placeholder="Поиск…" class="w-64" />
+        <Input v-model="query" :placeholder="t('todo.search')" class="w-64" />
 
         <!-- Приоритет -->
         <ToggleGroup v-model="priority" type="multiple">
@@ -27,16 +25,16 @@
         <!-- Сортировка -->
         <Select v-model="sort">
           <SelectTrigger class="w-40">
-            <SelectValue placeholder="Сортировка" />
+            <SelectValue :placeholder="t('todo.sort')" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="due">По сроку</SelectItem>
-            <SelectItem value="created">По дате создания</SelectItem>
-            <SelectItem value="priority">По приоритету</SelectItem>
+            <SelectItem value="due">{{ t('todo.sort_due') }}</SelectItem>
+            <SelectItem value="created">{{ t('todo.sort_created') }}</SelectItem>
+            <SelectItem value="priority">{{ t('todo.sort_priority') }}</SelectItem>
           </SelectContent>
         </Select>
 
-        <Button variant="ghost" @click="resetFilters">Сброс</Button>
+        <Button variant="ghost" @click="resetFilters">{{ t('todo.reset') }}</Button>
       </div>
     </Card>
 
@@ -52,8 +50,8 @@
     <!-- Переключатель видов -->
     <Tabs default-value="list" v-model="view">
       <TabsList class="mb-4">
-        <TabsTrigger value="list">Список</TabsTrigger>
-        <TabsTrigger value="calendar">Календарь</TabsTrigger>
+        <TabsTrigger value="list">{{ t('todo.view_list') }}</TabsTrigger>
+        <TabsTrigger value="calendar">{{ t('todo.view_calendar') }}</TabsTrigger>
       </TabsList>
 
       <!-- Список задач -->
@@ -63,7 +61,7 @@
 
           <p v-else-if="todosStore.todos.length === 0"
              class="text-center text-muted-foreground py-12">
-            У вас пока нет задач. Создайте первую!
+            {{ t('todo.no_tasks') }}
           </p>
 
           <TransitionGroup v-else name="todo" tag="div" class="space-y-4">
@@ -90,7 +88,7 @@
           />
           <ScrollArea class="md:w-full md:h-auto h-64 space-y-4">
             <p v-if="selectedTodos.length === 0" class="text-center text-muted-foreground py-12">
-              Задач на выбранную дату нет
+              {{ t('todo.no_tasks_date') }}
             </p>
             <TodoItem
               v-for="todo in selectedTodos"
@@ -107,7 +105,7 @@
     <!-- Экспорт -->
     <Button variant="outline" @click="exportCsv">
       <Icon name="lucide:file-down" class="mr-2 h-4 w-4" />
-      Экспорт CSV
+      {{ t('todo.export_csv') }}
     </Button>
   </div>
 </template>
@@ -118,9 +116,11 @@ import { Tabs } from "~/components/ui/tabs"
 import { toast } from 'vue-sonner'
 import { ScrollArea } from "~/components/ui/scroll-area"
 import { SelectTrigger, SelectItem, SelectValue, SelectContent, Select } from "~/components/ui/select"
+import { useI18n } from '#imports'
 import { useTodosStore } from '~/stores/todos'
 import type { Todo } from '~/stores/todos'
 import Modal from '@/components/Modal.vue'
+const { t } = useI18n()
 
 const todosStore = useTodosStore()
 
@@ -159,10 +159,10 @@ const selectedTodos = computed(() =>
 
 const greeting = computed(() => {
   const hour = new Date().getHours()
-  if (hour < 5) return 'Доброй ночи'
-  if (hour < 12) return 'Доброе утро'
-  if (hour < 18) return 'Добрый день'
-  return 'Добрый вечер'
+  if (hour < 5) return t('greeting.night')
+  if (hour < 12) return t('greeting.morning')
+  if (hour < 18) return t('greeting.day')
+  return t('greeting.evening')
 })
 
 onMounted(() => {
@@ -211,9 +211,9 @@ function cancelEdit() {
 async function deleteTodo(id: number) {
   const result = await todosStore.deleteTodo(id)
   if (result.success && result.todo) {
-    toast('Задача удалена', {
+    toast(t('todo.deleted'), {
       action: {
-        label: 'Отменить',
+        label: t('todo.undo'),
         async onClick() {
           const t = result.todo
           await todosStore.createTodo(t.title, t.description, t.priority ?? 'P3', t.due_date ?? null)

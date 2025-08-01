@@ -41,18 +41,48 @@
                           class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                     <Icon name="radix-icons:moon"
                           class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    <span class="ml-2">Тема</span>
+                    <span class="ml-2">{{ t('common.theme') }}</span>
                   </DropdownMenuSubTrigger>
 
                   <DropdownMenuSubContent align="start">
-                    <DropdownMenuItem @select.prevent="colorMode.preference = 'light'">
-                      Светлая
+                    <DropdownMenuItem
+                      @select.prevent="colorMode.preference = 'light'"
+                      :class="{ 'bg-accent text-accent-foreground': colorMode.preference === 'light' }"
+                    >
+                      {{ t('common.theme_light') }}
                     </DropdownMenuItem>
-                    <DropdownMenuItem @select.prevent="colorMode.preference = 'dark'">
-                      Темная
+                    <DropdownMenuItem
+                      @select.prevent="colorMode.preference = 'dark'"
+                      :class="{ 'bg-accent text-accent-foreground': colorMode.preference === 'dark' }"
+                    >
+                      {{ t('common.theme_dark') }}
                     </DropdownMenuItem>
-                    <DropdownMenuItem @select.prevent="colorMode.preference = 'system'">
-                      Системная
+                    <DropdownMenuItem
+                      @select.prevent="colorMode.preference = 'system'"
+                      :class="{ 'bg-accent text-accent-foreground': colorMode.preference === 'system' }"
+                    >
+                      {{ t('common.theme_system') }}
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger class="flex items-center">
+                    <Icon name="radix-icons:globe" class="h-[1.2rem] w-[1.2rem]" />
+                    <span class="ml-2">{{ t('common.language') }}</span>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent align="start">
+                    <DropdownMenuItem
+                      @select.prevent="changeLocale('ru')"
+                      :class="{ 'bg-accent text-accent-foreground': locale === 'ru' }"
+                    >
+                      {{ t('common.russian') }}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      @select.prevent="changeLocale('en')"
+                      :class="{ 'bg-accent text-accent-foreground': locale === 'en' }"
+                    >
+                      {{ t('common.english') }}
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
@@ -60,8 +90,8 @@
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem class="cursor-pointer" @click="logout">
-                  <Icon name="lucide:log-out" class="mr-2 h-4 w-4" />
-                  Выйти
+                  <Icon name="radix-icons:exit" class="mr-2 h-4 w-4" />
+                  {{ t('common.logout') }}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -90,10 +120,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from "~/components/ui/dropdown-menu"
 
 const authStore = useAuthStore()
 const colorMode = useColorMode()
+const { t, setLocale, locale } = useI18n()
 
 const initials = computed(() =>
   authStore.user?.email?.slice(0, 2).toUpperCase() || 'U'
@@ -107,5 +141,13 @@ function gravatar(email: string) {
 
 function logout() {
   authStore.logout()
+}
+
+async function changeLocale(newLocale: string) {
+  try {
+    await setLocale(newLocale)
+  } catch (error) {
+    toast('Failed to change locale')
+  }
 }
 </script>

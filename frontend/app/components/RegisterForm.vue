@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useI18n } from '#imports'
 
 const props = defineProps<{
   loading: boolean
@@ -21,6 +22,7 @@ const emit = defineEmits<{
 const email = ref('')
 const password = ref('')
 const passwordConfirm = ref('')
+const { t } = useI18n()
 const passwordsMatch = computed(() => password.value === passwordConfirm.value)
 const showMismatchError = computed(() => passwordConfirm.value !== '' && !passwordsMatch.value)
 
@@ -46,10 +48,10 @@ function onSubmit() {
         <form @submit.prevent="onSubmit" class="space-y-6">
           <div class="flex flex-col items-center text-center">
               <h1 class="text-2xl font-bold">
-                Регистрация
+                {{ t('register.register') }}
               </h1>
               <p class="text-muted-foreground text-balance">
-                Введите свои данные для создания учетной записи
+                {{ t('register.enter_details') }}
               </p>
             </div>
           <div>
@@ -64,7 +66,7 @@ function onSubmit() {
             />
           </div>
           <div>
-            <Label for="password">Пароль</Label>
+            <Label for="password">{{ t('login.password') }}</Label>
             <Input
               id="password"
               v-model="password"
@@ -75,7 +77,7 @@ function onSubmit() {
             />
           </div>
           <div>
-            <Label for="password-confirm">Повторите пароль</Label>
+            <Label for="password-confirm">{{ t('register.password_confirm') }}</Label>
             <Input
               id="password-confirm"
               v-model="passwordConfirm"
@@ -86,7 +88,7 @@ function onSubmit() {
               :aria-invalid="showMismatchError ? 'true' : 'false'"
             />
             <p v-if="showMismatchError" class="text-sm text-red-600 mt-1">
-              Пароли не совпадают.
+              {{ t('register.passwords_not_match') }}
             </p>
           </div>
 
@@ -100,13 +102,13 @@ function onSubmit() {
             :disabled="props.loading || !passwordsMatch"
           >
             <span v-if="props.loading" class="animate-spin inline-block w-4 h-4 border-2 rounded-full border-current border-t-transparent"/>
-            <span v-else>Зарегистрироваться</span>
+            <span v-else>{{ t('login.sign_up') }}</span>
           </Button>
 
           <div class="text-center text-sm">
-            Уже есть аккаунт?
+            {{ t('register.have_account') }}
             <NuxtLink to="/login" class="underline underline-offset-4">
-              Войти
+              {{ t('register.sign_in') }}
             </NuxtLink>
           </div>
         </form>
