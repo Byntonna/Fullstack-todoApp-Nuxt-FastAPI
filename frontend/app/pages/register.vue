@@ -17,14 +17,10 @@ async function onRegister({ email, password }: { email: string; password: string
   error.value = ''
 
   try {
-    const result = await authStore.register(email, password)
-    if (result.success) {
-      router.push('/')
-    } else {
-      error.value = result.error || 'Ошибка регистрации'
-    }
-  } catch (err) {
-    error.value = 'Произошла ошибка. Попробуйте снова.'
+    await authStore.register(email, password)
+    router.push('/')
+  } catch (err: any) {
+    error.value = err?.data?.detail || err.message || 'Ошибка регистрации'
   } finally {
     loading.value = false
   }
