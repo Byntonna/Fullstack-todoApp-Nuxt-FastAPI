@@ -1,0 +1,71 @@
+{
+  "common": {
+    "theme": "Theme",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "theme_system": "System",
+    "logout": "Logout",
+    "language": "Language",
+    "russian": "Russian",
+    "english": "English",
+    "cancel": "Cancel"
+  },
+  "greeting": {
+    "night": "Good night",
+    "morning": "Good morning",
+    "day": "Good afternoon",
+    "evening": "Good evening"
+  },
+  "todo": {
+    "stats": "Total — {total}, completed — {completed}, remaining — {remaining}",
+    "add": "Add task",
+    "search": "Search…",
+    "sort": "Sort",
+    "sort_due": "By due date",
+    "sort_created": "By creation date",
+    "sort_priority": "By priority",
+    "reset": "Reset",
+    "view_list": "List",
+    "view_calendar": "Calendar",
+    "no_tasks": "No tasks yet. Create your first one!",
+    "no_tasks_date": "No tasks for selected date",
+    "export_csv": "Export CSV",
+    "deleted": "Task deleted",
+    "undo": "Undo"
+  },
+  "login": {
+    "welcome": "Welcome",
+    "signin_to_account": "Sign in to your account",
+    "forgot_password": "Forgot password?",
+    "password": "Password",
+    "sign_in": "Login",
+    "no_account": "Don't have an account?",
+    "sign_up": "Sign up",
+    "error": "Login failed",
+    "agree_terms": "By continuing, you agree to our {0} and {1}.",
+    "terms_of_service": "Terms of Service",
+    "privacy_policy": "Privacy Policy"
+  },
+  "register": {
+    "register": "Register",
+    "enter_details": "Enter your details to create an account",
+    "password_confirm": "Confirm password",
+    "passwords_not_match": "Passwords do not match.",
+    "have_account": "Already have an account?",
+    "sign_in": "Sign in",
+    "email_used": "Email {email} is already used. Please login or use another email.",
+    "invalid_data": "Please check the entered data",
+    "failed": "Could not create account. Please try again."
+  },
+  "todoform": {
+    "title": "Task title",
+    "enter_title": "Enter task title",
+    "description": "Description",
+    "enter_description": "Enter task description",
+    "priority": "Priority",
+    "choose_priority": "Choose priority",
+    "due_date": "Due date",
+    "update": "Update",
+    "create": "Create"
+  }
+}

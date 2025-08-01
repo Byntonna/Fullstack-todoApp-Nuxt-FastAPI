@@ -41,18 +41,33 @@
                           class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                     <Icon name="radix-icons:moon"
                           class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    <span class="ml-2">Тема</span>
+                    <span class="ml-2">{{ t('common.theme') }}</span>
                   </DropdownMenuSubTrigger>
 
                   <DropdownMenuSubContent align="start">
                     <DropdownMenuItem @select.prevent="colorMode.preference = 'light'">
-                      Светлая
+                      {{ t('common.theme_light') }}
                     </DropdownMenuItem>
                     <DropdownMenuItem @select.prevent="colorMode.preference = 'dark'">
-                      Темная
+                      {{ t('common.theme_dark') }}
                     </DropdownMenuItem>
                     <DropdownMenuItem @select.prevent="colorMode.preference = 'system'">
-                      Системная
+                      {{ t('common.theme_system') }}
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger class="flex items-center">
+                    <Icon name="radix-icons:globe" class="h-[1.2rem] w-[1.2rem]" />
+                    <span class="ml-2">{{ t('common.language') }}</span>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent align="start">
+                    <DropdownMenuItem @select.prevent="locale = 'ru'">
+                      {{ t('common.russian') }}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem @select.prevent="locale = 'en'">
+                      {{ t('common.english') }}
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
@@ -61,7 +76,7 @@
 
                 <DropdownMenuItem class="cursor-pointer" @click="logout">
                   <Icon name="lucide:log-out" class="mr-2 h-4 w-4" />
-                  Выйти
+                  {{ t('common.logout') }}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -91,9 +106,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu"
+import { useI18n } from '#imports'
 
 const authStore = useAuthStore()
 const colorMode = useColorMode()
+const { t, locale } = useI18n()
 
 const initials = computed(() =>
   authStore.user?.email?.slice(0, 2).toUpperCase() || 'U'

@@ -17,7 +17,8 @@ export default defineNuxtConfig({
     '@nuxt/image',
     'shadcn-nuxt',
     '@pinia/nuxt',
-    '@nuxtjs/color-mode'
+    '@nuxtjs/color-mode',
+    '@nuxtjs/i18n',
   ],
   shadcn: {
     prefix: '',
@@ -32,6 +33,21 @@ export default defineNuxtConfig({
 
   colorMode: {
     classSuffix: ''
+  },
+
+  i18n: {
+    defaultLocale: 'en',
+    strategy: 'no_prefix',
+    lazy: true,
+    langDir: 'locales',
+    locales: [
+      { code: 'en', file: 'en.json', name: 'English' },
+      { code: 'ru', file: 'ru.json', name: 'Русский' }
+    ],
+    detectBrowserLanguage: {
+      useCookie: true,
+      fallbackLocale: 'en'
+    }
   },
 
   ssr: true

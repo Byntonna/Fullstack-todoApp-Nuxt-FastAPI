@@ -5,6 +5,7 @@ definePageMeta({ layout: false })
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '~/stores/auth'
+import { useI18n } from '#imports'
 import LoginForm from '@/components/LoginForm.vue'
 
 const authStore = useAuthStore()
@@ -12,6 +13,7 @@ const router = useRouter()
 
 const loading = ref(false)
 const error = ref('')
+const { t } = useI18n()
 
 async function onLogin({ email, password }: { email: string; password: string }) {
   loading.value = true
@@ -21,7 +23,7 @@ async function onLogin({ email, password }: { email: string; password: string })
     await authStore.login(email, password)
     await router.push('/')
   } catch (err: any) {
-    error.value = err.data?.detail || err.message || 'Ошибка входа'
+    error.value = err.data?.detail || err.message || t('login.error')
   } finally {
     loading.value = false
   }

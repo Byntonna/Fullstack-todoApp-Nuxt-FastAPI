@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Button } from '@/components/ui/button'
+import { useI18n } from '#imports'
 
 type Priority = 'P1' | 'P2' | 'P3'
 
@@ -78,6 +79,7 @@ watch(
 const onSubmit = form.handleSubmit((values) => {
   emit('submit', values)                    // values: {title, description, priority, due_date}
 })
+const { t } = useI18n()
 </script>
 
 <template>
@@ -86,11 +88,11 @@ const onSubmit = form.handleSubmit((values) => {
     <!-- Название -->
     <FormField v-slot="{ componentField }" name="title">
       <FormItem>
-        <FormLabel>Название задачи</FormLabel>
+        <FormLabel>{{ t('todoform.title') }}</FormLabel>
         <FormControl>
           <Input
             type="text"
-            placeholder="Введите название задачи"
+            :placeholder="t('todoform.enter_title')"
             :disabled="props.loading"
             v-bind="componentField"
           />
@@ -102,10 +104,10 @@ const onSubmit = form.handleSubmit((values) => {
     <!-- Описание -->
     <FormField v-slot="{ componentField }" name="description">
       <FormItem>
-        <FormLabel>Описание</FormLabel>
+        <FormLabel>{{ t('todoform.description') }}</FormLabel>
         <FormControl>
           <Textarea
-            placeholder="Введите описание задачи"
+            :placeholder="t('todoform.enter_description')"
             rows="3"
             :disabled="props.loading"
             v-bind="componentField"
@@ -118,11 +120,11 @@ const onSubmit = form.handleSubmit((values) => {
     <!-- Приоритет -->
     <FormField v-slot="{ componentField }" name="priority">
       <FormItem>
-        <FormLabel>Приоритет</FormLabel>
+        <FormLabel>{{ t('todoform.priority') }}</FormLabel>
         <FormControl>
           <ToggleGroup
             type="single"
-            aria-label="Выберите приоритет"
+            :aria-label="t('todoform.choose_priority')"
             :disabled="props.loading"
             v-bind="componentField"
           >
@@ -163,7 +165,7 @@ const onSubmit = form.handleSubmit((values) => {
     <!-- Срок (due_date) -->
     <FormField v-slot="{ componentField }" name="due_date">
       <FormItem>
-        <FormLabel>Срок выполнения</FormLabel>
+        <FormLabel>{{ t('todoform.due_date') }}</FormLabel>
         <FormControl>
           <!-- Можно заменить на ready-made date-picker, если есть -->
           <Input
@@ -184,13 +186,13 @@ const onSubmit = form.handleSubmit((values) => {
         :disabled="props.loading"
         @click="$emit('cancel')"
       >
-        Отмена
+        {{ t('common.cancel') }}
       </Button>
       <Button
         type="submit"
         :disabled="props.loading"
       >
-        {{ props.editingTodo ? 'Обновить' : 'Создать' }}
+        {{ props.editingTodo ? t('todoform.update') : t('todoform.create') }}
       </Button>
     </div>
   </form>

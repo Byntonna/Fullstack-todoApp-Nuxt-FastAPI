@@ -92,6 +92,7 @@ import { ref, computed } from 'vue'
 import { useTodosStore } from '~/stores/todos'
 import { Checkbox } from '~/components/ui/checkbox'
 import type { Todo } from '~/stores/todos'
+import { useI18n } from '#imports'
 
 interface TodoExtended extends Todo {
   priority?: 'P1' | 'P2' | 'P3'
@@ -107,6 +108,7 @@ defineEmits<{
 
 const todosStore = useTodosStore()
 const isToggling = ref(false)
+const { locale } = useI18n()
 
 const isOverdue = computed(() => {
   if (!todo.due_date || todo.completed) return false
@@ -130,7 +132,8 @@ async function toggleComplete() {
 }
 
 function formatDate(dateString: string, onlyDate = false) {
-  return new Date(dateString).toLocaleDateString('ru-RU', {
+  const loc = locale.value === 'ru' ? 'ru-RU' : 'en-US'
+  return new Date(dateString).toLocaleDateString(loc, {
     day: 'numeric',
     month: 'short',
     ...(onlyDate ? {} : { hour: '2-digit', minute: '2-digit' }),
