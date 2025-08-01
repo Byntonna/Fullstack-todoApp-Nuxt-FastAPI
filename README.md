@@ -5,7 +5,7 @@
 
 ## Особенности
 - Аутентификация и авторизация с JWT токенами
-- Адаптивный дизайн с Nuxt UI
+- Адаптивный дизайн с shadcn/vue
 - Real-time обновления (опционально с WebSocket)
 - TypeScript для типобезопасности
 - Docker для легкого развертывания
@@ -92,6 +92,8 @@ pip install -r requirements.txt
 
 touch .env
 # Отредактировать .env файл
+# Структура .env фалйа:
+# AUTH_SECRET_KEY=<jwt-ключ>
 
 # Запуск БД
 docker run -d \
