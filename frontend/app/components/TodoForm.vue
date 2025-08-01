@@ -43,7 +43,7 @@ const formSchema = toTypedSchema(
   z.object({
     title:       z.string().min(1, 'Название обязательно'),
     description: z.string().optional(),
-    priority:    z.enum(['P1', 'P2', 'P3']),
+    priority:    z.enum(['P1', 'P2', 'P3']).default('P3'),
     // «date» валидируется как строка ISO-формата «YYYY-MM-DD»
     due_date:    z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   })

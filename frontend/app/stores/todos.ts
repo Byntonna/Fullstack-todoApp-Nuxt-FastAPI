@@ -126,6 +126,51 @@ export const useTodosStore = defineStore('todos', {
       }
     },
 
+    async exportCsv(list: Todo[] = this.todos) {
+      if (process.server) return
+      if (!list.length) return
+
+      const header = [
+        'ID',
+        'Title',
+        'Description',
+        'Completed',
+        'Priority',
+        'Due Date',
+        'Created At',
+        'Updated At'
+      ]
+
+      const quote = (value: string | number | undefined | null) => {
+        const str = (value ?? '').toString().replace(/"/g, '""')
+        return `"${str}"`
+      }
+
+      const rows = list.map(t => [
+        t.id,
+        quote(t.title),
+        quote(t.description),
+        t.completed,
+        t.priority ?? '',
+        t.due_date ?? '',
+        t.created_at,
+        t.updated_at ?? ''
+      ])
+
+      const csv = [header, ...rows].map(r => r.join(',')).join('\r\n')
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `todos_${new Date().toISOString().slice(0,10)}.csv`
+      link.style.display = 'none'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    },
+
     async updateTodo(id: number, updates: Partial<Pick<Todo, 'title' | 'description' | 'completed' | 'priority' | 'due_date'>>) {
       try {
         const authStore = useAuthStore()
