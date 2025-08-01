@@ -209,7 +209,18 @@ function cancelEdit() {
 }
 
 async function deleteTodo(id: number) {
-  await todosStore.deleteTodo(id)
+  const result = await todosStore.deleteTodo(id)
+  if (result.success && result.todo) {
+    toast('Задача удалена', {
+      action: {
+        label: 'Отменить',
+        async onClick() {
+          const t = result.todo
+          await todosStore.createTodo(t.title, t.description, t.priority ?? 'P3', t.due_date ?? null)
+        }
+      }
+    })
+  }
 }
 
 function onDateChange(info: any) {

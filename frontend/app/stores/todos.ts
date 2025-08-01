@@ -202,7 +202,7 @@ export const useTodosStore = defineStore('todos', {
         const authStore = useAuthStore()
         const config = useRuntimeConfig()
 
-        await $fetch(`/todos/${id}`, {
+        const deleted = await $fetch<Todo>(`/todos/${id}`, {
           baseURL: config.public.apiBase,
           method: 'DELETE',
           headers: {
@@ -212,7 +212,7 @@ export const useTodosStore = defineStore('todos', {
 
         // Удаляем из локального состояния
         this.todos = this.todos.filter(todo => todo.id !== id)
-        return { success: true }
+        return { success: true, todo: deleted }
       } catch (error: any) {
         this.error = error.data?.detail || 'Failed to delete todo'
         return { success: false, error: this.error }
