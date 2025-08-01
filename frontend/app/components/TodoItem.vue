@@ -22,22 +22,22 @@
         <div v-if="todo.priority" class="flex items-center">
           <template v-if="todo.priority === 'P3'">
             <div class="flex items-center bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 rounded-full px-2">
-              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
+              <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
             </div>
           </template>
 
           <template v-else-if="todo.priority === 'P2'">
             <div class="flex items-center -space-x-4 bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 rounded-full px-2">
-              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
-              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
+              <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
+              <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
             </div>
           </template>
 
           <template v-else-if="todo.priority === 'P1'">
             <div class="flex items-center -space-x-4 bg-red-100 dark:bg-red-900/40 dark:text-red-300 rounded-full px-2">
-              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
-              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
-              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
+              <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
+              <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
+              <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
             </div>
           </template>
         </div>

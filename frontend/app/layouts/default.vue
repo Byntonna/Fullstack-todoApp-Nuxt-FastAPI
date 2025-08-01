@@ -46,13 +46,13 @@
 
                   <DropdownMenuSubContent align="start">
                     <DropdownMenuItem @select.prevent="colorMode.preference = 'light'">
-                      Light
+                      Светлая
                     </DropdownMenuItem>
                     <DropdownMenuItem @select.prevent="colorMode.preference = 'dark'">
-                      Dark
+                      Темная
                     </DropdownMenuItem>
                     <DropdownMenuItem @select.prevent="colorMode.preference = 'system'">
-                      System
+                      Системная
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>

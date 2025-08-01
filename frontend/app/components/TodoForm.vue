@@ -130,29 +130,29 @@ const onSubmit = form.handleSubmit((values) => {
               <div class="-space-x-4">
                 <Icon name="tabler:exclamation-mark"
                     size="20"
-                    style="color: black"/>
+                    style="color: currentColor"/>
               <Icon name="tabler:exclamation-mark"
                     size="20"
-                    style="color: black"/>
+                    style="color: currentColor"/>
               <Icon name="tabler:exclamation-mark"
                     size="20"
-                    style="color: black"/>
+                    style="color: currentColor"/>
               </div>
             </ToggleGroupItem>
             <ToggleGroupItem value="P2">
               <div class="-space-x-4">
                 <Icon name="tabler:exclamation-mark"
                     size="20"
-                    style="color: black"/>
+                    style="color: currentColor"/>
               <Icon name="tabler:exclamation-mark"
                     size="20"
-                    style="color: black"/>
+                    style="color: currentColor"/>
               </div>
             </ToggleGroupItem>
             <ToggleGroupItem value="P3" class="rounded-r-md">
                 <Icon name="tabler:exclamation-mark"
                     size="20"
-                    style="color: black"/>
+                    style="color: currentColor"/>
             </ToggleGroupItem>
           </ToggleGroup>
         </FormControl>
