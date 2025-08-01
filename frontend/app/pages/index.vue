@@ -159,7 +159,7 @@ const selectedTodos = computed(() =>
 
 const greeting = computed(() => {
   const hour = new Date().getHours()
-  if (hour > 0 || hour < 5) return 'Доброй ночи'
+  if (hour < 5) return 'Доброй ночи'
   if (hour < 12) return 'Доброе утро'
   if (hour < 18) return 'Добрый день'
   return 'Добрый вечер'

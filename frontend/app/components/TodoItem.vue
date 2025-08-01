@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border">
+  <div class="flex items-center gap-3 p-4 bg-white dark:bg-neutral-800 rounded-lg shadow-sm border">
     <!-- Чекбокс для отметки выполнения -->
     <Checkbox
       class="flex-shrink-0"
@@ -12,8 +12,8 @@
     <div class="flex-1 min-w-0">
       <div class="flex items-center gap-2">
         <h3
-          :class="{ 'line-through text-gray-500': todo.completed }"
-          class="font-medium text-gray-900 dark:text-white truncate"
+          :class="{ 'line-through text-neutral-500': todo.completed }"
+          class="font-medium text-neutral-900 dark:text-white truncate"
         >
           {{ todo.title }}
         </h3>
@@ -22,22 +22,22 @@
         <div v-if="todo.priority" class="flex items-center">
           <template v-if="todo.priority === 'P3'">
             <div class="flex items-center bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 rounded-full px-2">
-              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
+              <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
             </div>
           </template>
 
           <template v-else-if="todo.priority === 'P2'">
             <div class="flex items-center -space-x-4 bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 rounded-full px-2">
-              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
-              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
+              <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
+              <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
             </div>
           </template>
 
           <template v-else-if="todo.priority === 'P1'">
             <div class="flex items-center -space-x-4 bg-red-100 dark:bg-red-900/40 dark:text-red-300 rounded-full px-2">
-              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
-              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
-              <Icon name="tabler:exclamation-mark" size="20" style="color: black" />
+              <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
+              <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
+              <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
             </div>
           </template>
         </div>
@@ -46,8 +46,8 @@
       <!-- Описание -->
       <p
         v-if="todo.description"
-        :class="{ 'line-through text-gray-400': todo.completed }"
-        class="text-sm text-gray-600 dark:text-gray-300 mt-1"
+        :class="{ 'line-through text-neutral-400': todo.completed }"
+        class="text-sm text-neutral-600 dark:text-neutral-300 mt-1"
       >
         {{ todo.description }}
       </p>
@@ -55,13 +55,13 @@
       <!-- Срок выполнения -->
       <p
         v-if="todo.due_date"
-        :class="['text-xs mt-1', isOverdue ? 'text-red-500' : 'text-gray-400']"
+        :class="['text-xs mt-1', isOverdue ? 'text-red-500' : 'text-neutral-400']"
       >
         до {{ formatDate(todo.due_date, true) }}
       </p>
 
       <!-- Дата создания -->
-      <p class="text-xs text-gray-400 mt-2">
+      <p class="text-xs text-neutral-400 mt-2">
         {{ formatDate(todo.created_at) }}
       </p>
     </div>
@@ -74,7 +74,7 @@
         variant="ghost"
         @click="$emit('edit', todo)"
       >
-        <Icon name="solar:pen-new-square-outline" size="20" style="color: dimgray"/>
+        <Icon name="solar:pen-new-square-outline" size="20" style="color: currentColor"/>
       </Button>
       <Button
         size="sm"

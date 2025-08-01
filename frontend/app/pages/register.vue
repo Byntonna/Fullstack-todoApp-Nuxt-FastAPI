@@ -40,7 +40,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+  <div class="min-h-screen flex items-center justify-center">
     <div>
       <h2 class="sr-only">Registration page</h2>
       <RegisterForm

@@ -7,7 +7,7 @@
         @click.self="close"
         @keydown.esc="close"
       >
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-lg p-4" @click.stop>
+        <div class="bg-white dark:bg-neutral-900 rounded-lg shadow-lg w-full max-w-lg p-4" @click.stop>
           <slot />
         </div>
       </div>

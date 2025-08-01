@@ -131,7 +131,6 @@ export const useTodosStore = defineStore('todos', {
       if (!list.length) return
 
       const header = [
-        'ID',
         'Title',
         'Description',
         'Completed',
@@ -147,7 +146,6 @@ export const useTodosStore = defineStore('todos', {
       }
 
       const rows = list.map(t => [
-        t.id,
         quote(t.title),
         quote(t.description),
         t.completed,
