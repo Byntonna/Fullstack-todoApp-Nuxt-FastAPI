@@ -74,7 +74,7 @@
         variant="ghost"
         @click="$emit('edit', todo)"
       >
-        <Icon name="solar:pen-new-square-outline" size="20" style="color: dimgray"/>
+        <Icon name="solar:pen-new-square-outline" size="20" style="color: currentColor"/>
       </Button>
       <Button
         size="sm"
