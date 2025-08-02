@@ -52,6 +52,21 @@
         {{ todo.description }}
       </p>
 
+      <p v-if="todo.category" class="text-xs mt-1 text-blue-600 dark:text-blue-300">
+        {{ todo.category.name }}
+      </p>
+
+      <!-- Теги -->
+      <div v-if="todo.tags && todo.tags.length" class="flex flex-wrap gap-1 mt-1">
+        <span
+          v-for="tag in todo.tags"
+          :key="tag.id"
+          class="text-xs bg-neutral-200 dark:bg-neutral-700 rounded px-1"
+        >
+          #{{ tag.name }}
+        </span>
+      </div>
+
       <!-- Срок выполнения -->
       <p
         v-if="todo.due_date"

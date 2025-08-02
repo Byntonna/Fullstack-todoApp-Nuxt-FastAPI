@@ -13,7 +13,9 @@ class TodoBase(BaseModel):
     due_date: Optional[date] = None
 
 class TodoCreate(TodoBase):
-    pass
+    category: Optional[str] = None
+    tags: List[str] = []
+
 
 class TodoUpdate(TodoBase):
     title: Optional[str] = None
@@ -21,6 +23,32 @@ class TodoUpdate(TodoBase):
     completed: Optional[bool] = None
     priority: Optional[Priority] = None
     due_date: Optional[date] = None
+    category: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+class CategoryCreate(BaseModel):
+    name: str
+
+
+class Category(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
+
+class TagCreate(BaseModel):
+    name: str
+
+
+class Tag(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
 
 class Todo(TodoBase):
     id: int
@@ -28,6 +56,8 @@ class Todo(TodoBase):
     user_id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
+    category: Optional[Category] = None
+    tags: List[Tag] = []
 
     class Config:
         from_attributes = True

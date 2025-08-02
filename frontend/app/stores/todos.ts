@@ -1,6 +1,16 @@
 // stores/todos.ts - Store для управления задачами
 import { defineStore } from 'pinia'
 
+export interface Category {
+  id: number
+  name: string
+}
+
+export interface Tag {
+  id: number
+  name: string
+}
+
 export interface Todo {
   id: number
   title: string
@@ -11,6 +21,8 @@ export interface Todo {
   updated_at?: string
   due_date?: string
   priority?: 'P1' | 'P2' | 'P3'
+  category?: Category | null
+  tags?: Tag[]
 }
 
 interface TodoState {
@@ -103,7 +115,14 @@ export const useTodosStore = defineStore('todos', {
       }
     },
 
-    async createTodo(title: string, description?: string, priority: 'P1' | 'P2' | 'P3' = 'P3', due_date?: string | null) {
+    async createTodo(
+      title: string,
+      description?: string,
+      priority: 'P1' | 'P2' | 'P3' = 'P3',
+      due_date?: string | null,
+      category?: string,
+      tags: string[] = [],
+    ) {
       try {
         const authStore = useAuthStore()
         const config = useRuntimeConfig()
@@ -115,7 +134,7 @@ export const useTodosStore = defineStore('todos', {
             Authorization: `Bearer ${authStore.token}`,
             'Content-Type': 'application/json'
           },
-          body: { title, description, priority, due_date }
+          body: { title, description, priority, due_date, category, tags }
         })
 
         this.todos.unshift(newTodo) // Добавляем в начало списка
@@ -169,7 +188,13 @@ export const useTodosStore = defineStore('todos', {
       URL.revokeObjectURL(url)
     },
 
-    async updateTodo(id: number, updates: Partial<Pick<Todo, 'title' | 'description' | 'completed' | 'priority' | 'due_date'>>) {
+    async updateTodo(
+      id: number,
+      updates: Partial<Pick<Todo, 'title' | 'description' | 'completed' | 'priority' | 'due_date'>> & {
+        category?: string | null
+        tags?: string[]
+      }
+    ) {
       try {
         const authStore = useAuthStore()
         const config = useRuntimeConfig()

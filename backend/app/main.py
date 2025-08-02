@@ -3,7 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from . import models
 from .database import engine
-from .routes import todos, auth
+from .routes import todos, auth, categories, tags
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -23,6 +23,8 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(todos.router)
+app.include_router(categories.router)
+app.include_router(tags.router)
 
 @app.get("/")
 async def root():

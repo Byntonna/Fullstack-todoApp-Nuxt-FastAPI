@@ -40,7 +40,14 @@
 
     <Modal v-model="showForm">
       <TodoForm
-        :editing-todo="editingTodo"
+        :editing-todo="editingTodo ? {
+          title: editingTodo.title,
+          description: editingTodo.description,
+          priority: editingTodo.priority,
+          due_date: editingTodo.due_date,
+          category: editingTodo.category?.name || '',
+          tags: editingTodo.tags?.map(t => t.name) || []
+        } : null"
         :loading="formLoading"
         @submit="handleSubmit"
         @cancel="cancelEdit"
@@ -190,12 +197,12 @@ function startEdit(todo: Todo) {
   showForm.value = true
 }
 
-async function handleSubmit(data: { title: string; description?: string; priority: 'P1' | 'P2' | 'P3'; due_date?: string | null }) {
+async function handleSubmit(data: { title: string; description?: string; priority: 'P1' | 'P2' | 'P3'; due_date?: string | null; category?: string; tags: string[] }) {
   formLoading.value = true
   try {
     const result = editingTodo.value
       ? await todosStore.updateTodo(editingTodo.value.id, data)
-      : await todosStore.createTodo(data.title, data.description, data.priority, data.due_date)
+      : await todosStore.createTodo(data.title, data.description, data.priority, data.due_date, data.category, data.tags)
     if (result.success) {
       editingTodo.value = null
       showForm.value = false
@@ -218,7 +225,14 @@ async function deleteTodo(id: number) {
         label: t('todo.undo'),
         async onClick() {
           const t = result.todo
-          await todosStore.createTodo(t.title, t.description, t.priority ?? 'P3', t.due_date ?? null)
+          await todosStore.createTodo(
+            t.title,
+            t.description,
+            t.priority ?? 'P3',
+            t.due_date ?? null,
+            t.category?.name,
+            t.tags?.map(tag => tag.name) ?? [],
+          )
         }
       }
     })

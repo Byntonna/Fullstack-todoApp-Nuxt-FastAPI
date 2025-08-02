@@ -25,6 +25,8 @@ const props = defineProps<{
     description?: string
     priority?: Priority
     due_date?: string | null
+    category?: string | null
+    tags?: string[]
   } | null
   loading: boolean
 }>()
@@ -35,6 +37,8 @@ const emit = defineEmits<{
     description?: string
     priority: Priority
     due_date?: string | null
+    category?: string
+    tags: string[]
   }): void
   (e: 'cancel'): void
 }>()
@@ -47,6 +51,8 @@ const formSchema = toTypedSchema(
     priority:    z.enum(['P1', 'P2', 'P3']).default('P3'),
     // «date» валидируется как строка ISO-формата «YYYY-MM-DD»
     due_date:    z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+    category:    z.string().optional(),
+    tags:        z.string().optional(),
   })
 )
 
@@ -58,6 +64,8 @@ const form = useForm({
     description: props.editingTodo?.description ?? '',
     priority:    props.editingTodo?.priority    ?? 'P3',
     due_date:    props.editingTodo?.due_date    ?? null,
+    category:    props.editingTodo?.category    ?? '',
+    tags:        props.editingTodo?.tags?.join(', ') ?? '',
   },
 })
 
@@ -71,13 +79,22 @@ watch(
         description: val?.description ?? '',
         priority:    val?.priority    ?? 'P3',
         due_date:    val?.due_date    ?? null,
+        category:    val?.category    ?? '',
+        tags:        val?.tags?.join(', ') ?? '',
       },
     })
   },
 )
 
 const onSubmit = form.handleSubmit((values) => {
-  emit('submit', values)                    // values: {title, description, priority, due_date}
+  emit('submit', {
+    title: values.title,
+    description: values.description || undefined,
+    priority: values.priority,
+    due_date: values.due_date ?? undefined,
+    category: values.category || undefined,
+    tags: values.tags ? values.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+  })
 })
 const { t } = useI18n()
 </script>
@@ -109,6 +126,37 @@ const { t } = useI18n()
           <Textarea
             :placeholder="t('todoform.enter_description')"
             rows="3"
+            :disabled="props.loading"
+            v-bind="componentField"
+          />
+        </FormControl>
+        <FormMessage/>
+      </FormItem>
+    </FormField>
+
+    <FormField v-slot="{ componentField }" name="category">
+      <FormItem>
+        <FormLabel>{{ t('todoform.category') }}</FormLabel>
+        <FormControl>
+          <Input
+            type="text"
+            :placeholder="t('todoform.enter_category')"
+            :disabled="props.loading"
+            v-bind="componentField"
+          />
+        </FormControl>
+        <FormMessage/>
+      </FormItem>
+    </FormField>
+
+    <!-- Теги -->
+    <FormField v-slot="{ componentField }" name="tags">
+      <FormItem>
+        <FormLabel>{{ t('todoform.tags') }}</FormLabel>
+        <FormControl>
+          <Input
+            type="text"
+            :placeholder="t('todoform.enter_tags')"
             :disabled="props.loading"
             v-bind="componentField"
           />
