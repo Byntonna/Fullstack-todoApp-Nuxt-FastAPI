@@ -1,8 +1,8 @@
 <template>
-  <div class="flex items-center gap-3 p-4 bg-white dark:bg-neutral-800 rounded-lg shadow-sm border">
+  <div class="flex items-center gap-3 p-4 bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700">
     <!-- Чекбокс для отметки выполнения -->
     <Checkbox
-      class="flex-shrink-0"
+      class="flex-shrink-0 dark:border-neutral-200"
       :model-value="todo.completed"
       :class="{ 'cursor-progress': isToggling, 'cursor-pointer': !isToggling }"
       @update:model-value="toggleComplete"
@@ -12,7 +12,7 @@
     <div class="flex-1 min-w-0">
       <div class="flex items-center gap-2">
         <h3
-          :class="{ 'line-through text-neutral-500': todo.completed }"
+          :class="{ 'line-through text-neutral-500 dark:text-neutral-400': todo.completed }"
           class="font-medium text-neutral-900 dark:text-white truncate"
         >
           {{ todo.title }}
@@ -46,22 +46,36 @@
       <!-- Описание -->
       <p
         v-if="todo.description"
-        :class="{ 'line-through text-neutral-400': todo.completed }"
+        :class="{ 'line-through text-neutral-400 dark:text-neutral-500': todo.completed }"
         class="text-sm text-neutral-600 dark:text-neutral-300 mt-1"
       >
         {{ todo.description }}
       </p>
 
+      <p v-if="todo.category" class="text-xs mt-1 text-blue-600 dark:text-blue-300">
+        {{ todo.category.name }}
+      </p>
+
+      <!-- Теги -->
+      <div v-if="todo.tags && todo.tags.length" class="flex flex-wrap gap-1 mt-1">
+        <span
+          v-for="tag in todo.tags"
+          :key="tag.id"
+          class="text-xs bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded px-1"
+        >
+          #{{ tag.name }}
+        </span>
+      </div>
+
       <!-- Срок выполнения -->
       <p
         v-if="todo.due_date"
-        :class="['text-xs mt-1', isOverdue ? 'text-red-500' : 'text-neutral-400']"
-      >
+        :class="['text-xs mt-1', isOverdue ? 'text-red-500 dark:text-red-400' : 'text-neutral-400 dark:text-neutral-500']"      >
         {{ t('todo.expires_until') }} {{ formatDate(todo.due_date, true) }}
       </p>
 
       <!-- Дата создания -->
-      <p class="text-xs text-neutral-400 mt-2">
+      <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-2">
         {{ formatDate(todo.created_at) }}
       </p>
     </div>

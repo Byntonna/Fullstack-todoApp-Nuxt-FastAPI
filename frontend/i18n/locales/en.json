@@ -67,6 +67,10 @@
     "priority": "Priority",
     "choose_priority": "Choose priority",
     "due_date": "Due date",
+    "category": "Category",
+    "enter_category": "Enter category",
+    "tags": "Tags",
+    "enter_tags": "Enter tags separated by commas",
     "update": "Update",
     "create": "Create"
   }

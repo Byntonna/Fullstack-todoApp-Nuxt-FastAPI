@@ -1,5 +1,16 @@
 // stores/todos.ts - Store для управления задачами
 import { defineStore } from 'pinia'
+import Fuse from 'fuse.js'
+
+export interface Category {
+  id: number
+  name: string
+}
+
+export interface Tag {
+  id: number
+  name: string
+}
 
 export interface Todo {
   id: number
@@ -11,6 +22,8 @@ export interface Todo {
   updated_at?: string
   due_date?: string
   priority?: 'P1' | 'P2' | 'P3'
+  category?: Category | null
+  tags?: Tag[]
 }
 
 interface TodoState {
@@ -33,47 +46,44 @@ export const useTodosStore = defineStore('todos', {
 
     // Новый геттер: фильтрация + сортировка
     filterAndSort: (state) => {
-      return ({query = '', priority = [], sort = 'due' as 'due' | 'created' | 'priority'}) => {
-        let result = [...state.todos];
+      return ({ query = '', priority = [], sort = 'due' as 'due' | 'created' | 'priority' }) => {
+        let result = [...state.todos]
 
-        // Поиск по title и description (регистр нечувствителен)
+        // Поиск по title, description, категории и тегам (регистр нечувствителен)
         if (query.trim()) {
-          const q = query.toLowerCase();
-          result = result.filter(t =>
-              t.title.toLowerCase().includes(q) ||
-              (t.description?.toLowerCase().includes(q))
-          );
+          const fuse = new Fuse(result, {
+            keys: ['title', 'description', 'category.name', 'tags.name'],
+            threshold: 0.3,
+            ignoreLocation: true
+          })
+          result = fuse.search(query).map(r => r.item)
         }
 
         // Фильтрация по приоритету (если в todo есть поле priority)
         if (priority.length > 0) {
-          result = result.filter(t => {
-            // Если у задачи нет priority, исключаем; предполагается, что в todo есть поле priority: 'P1' | 'P2' | 'P3'
-            // Если структура другая — адаптируйте
-            return priority.includes((t as any).priority);
-          });
+          result = result.filter(t => t.priority ? priority.includes(t.priority) : false)
         }
 
         // Сортировка
         result.sort((a, b) => {
           if (sort === 'due') {
-            const da = (a as any).due_date ? new Date((a as any).due_date).getTime() : Infinity;
-            const db = (b as any).due_date ? new Date((b as any).due_date).getTime() : Infinity;
-            return da - db;
+            const da = a.due_date ? new Date(a.due_date).getTime() : Infinity
+            const db = b.due_date ? new Date(b.due_date).getTime() : Infinity
+            return da - db
           }
           if (sort === 'created') {
-            return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+            return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
           }
           if (sort === 'priority') {
-            const order = {P1: 1, P2: 2, P3: 3};
-            const pa = order[((a as any).priority || 'P3') as keyof typeof order] ?? 99;
-            const pb = order[((b as any).priority || 'P3') as keyof typeof order] ?? 99;
-            return pa - pb;
+            const order = { P1: 1, P2: 2, P3: 3 }
+            const pa = order[a.priority ?? 'P3'] ?? 99
+            const pb = order[b.priority ?? 'P3'] ?? 99
+            return pa - pb
           }
-          return 0;
-        });
+          return 0
+        })
 
-        return result;
+        return result
       }
     }
   },
@@ -95,15 +105,23 @@ export const useTodosStore = defineStore('todos', {
         })
 
         this.todos = todos
-      } catch (error: any) {
-        this.error = error.data?.detail || 'Failed to fetch todos'
+      } catch (error: unknown) {
+        const err = error as { data?: { detail?: string } }
+        this.error = err.data?.detail || 'Failed to fetch todos'
         console.error('Fetch todos error:', error)
       } finally {
         this.loading = false
       }
     },
 
-    async createTodo(title: string, description?: string, priority: 'P1' | 'P2' | 'P3' = 'P3', due_date?: string | null) {
+    async createTodo(
+      title: string,
+      description?: string,
+      priority: 'P1' | 'P2' | 'P3' = 'P3',
+      due_date?: string | null,
+      category?: string,
+      tags: string[] = [],
+    ) {
       try {
         const authStore = useAuthStore()
         const config = useRuntimeConfig()
@@ -115,19 +133,20 @@ export const useTodosStore = defineStore('todos', {
             Authorization: `Bearer ${authStore.token}`,
             'Content-Type': 'application/json'
           },
-          body: { title, description, priority, due_date }
+          body: { title, description, priority, due_date, category, tags }
         })
 
         this.todos.unshift(newTodo) // Добавляем в начало списка
-        return { success: true }
-      } catch (error: any) {
-        this.error = error.data?.detail || 'Failed to create todo'
-        return { success: false, error: this.error }
-      }
-    },
+          return { success: true }
+        } catch (error: unknown) {
+          const err = error as { data?: { detail?: string } }
+          this.error = err.data?.detail || 'Failed to create todo'
+          return { success: false, error: this.error }
+        }
+      },
 
     async exportCsv(list: Todo[] = this.todos) {
-      if (process.server) return
+      if (import.meta.server) return
       if (!list.length) return
 
       const header = [
@@ -169,7 +188,13 @@ export const useTodosStore = defineStore('todos', {
       URL.revokeObjectURL(url)
     },
 
-    async updateTodo(id: number, updates: Partial<Pick<Todo, 'title' | 'description' | 'completed' | 'priority' | 'due_date'>>) {
+    async updateTodo(
+      id: number,
+      updates: Partial<Pick<Todo, 'title' | 'description' | 'completed' | 'priority' | 'due_date'>> & {
+        category?: string | null
+        tags?: string[]
+      }
+    ) {
       try {
         const authStore = useAuthStore()
         const config = useRuntimeConfig()
@@ -191,8 +216,9 @@ export const useTodosStore = defineStore('todos', {
         }
 
         return { success: true }
-      } catch (error: any) {
-        this.error = error.data?.detail || 'Failed to update todo'
+      } catch (error: unknown) {
+        const err = error as { data?: { detail?: string } }
+        this.error = err.data?.detail || 'Failed to update todo'
         return { success: false, error: this.error }
       }
     },
@@ -213,8 +239,9 @@ export const useTodosStore = defineStore('todos', {
         // Удаляем из локального состояния
         this.todos = this.todos.filter(todo => todo.id !== id)
         return { success: true, todo: deleted }
-      } catch (error: any) {
-        this.error = error.data?.detail || 'Failed to delete todo'
+      } catch (error: unknown) {
+        const err = error as { data?: { detail?: string } }
+        this.error = err.data?.detail || 'Failed to delete todo'
         return { success: false, error: this.error }
       }
     },
