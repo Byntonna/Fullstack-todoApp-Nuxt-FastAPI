@@ -14,20 +14,31 @@ export const useAuthStore = defineStore('auth', () => {
   const user  = ref<User | null>(null)
   const token = ref<string | null>(null)
   const ready = ref(false)
+  const refreshToken = ref<string | null>(null)
 
   const isAuthenticated = computed(
     () => Boolean(token.value && user.value),
   )
 
   // ─── helpers ──────────────────────────────────────────────────────────────
-  function setToken (value: string | null) {
+  function setAccessToken (value: string | null) {
     const cookie = useCookie<string | null>('token', {
       sameSite: 'lax',
       secure   : process.env.NODE_ENV === 'production',
-      maxAge   : 60 * 60 * 24 * 7, // 7 дней
+      maxAge   : 60 * 60, // 1 час
     })
     cookie.value = value
     token.value  = value
+  }
+
+  function setRefreshToken (value: string | null) {
+    const cookie = useCookie<string | null>('refresh_token', {
+      sameSite: 'lax',
+      secure   : process.env.NODE_ENV === 'production',
+      maxAge   : 60 * 60 * 24 * 180, // 6 месяцев
+    })
+    cookie.value  = value
+    refreshToken.value = value
   }
 
   // ─── actions ──────────────────────────────────────────────────────────────
@@ -37,12 +48,13 @@ export const useAuthStore = defineStore('auth', () => {
     form.append('username', email)
     form.append('password', password)
 
-    const { access_token } = await $fetch<{access_token: string}>(
+    const { access_token, refresh_token } = await $fetch<{access_token: string, refresh_token: string}>(
       '/auth/login',
       { baseURL: config.public.apiBase, method: 'POST', body: form },
     )
 
-    setToken(access_token)
+    setAccessToken(access_token)
+    setRefreshToken(refresh_token)
     await fetchUser()
   }
 
@@ -58,9 +70,26 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function logout () {
     user.value = null
-    setToken(null)
+    setAccessToken(null)
+    setRefreshToken(null)
     await nextTick()
     navigateTo('/login')
+  }
+
+  async function refreshTokens () {
+    if (!refreshToken.value) return false
+    try {
+      const config = useRuntimeConfig()
+      const { access_token, refresh_token } = await $fetch<{access_token: string, refresh_token: string}>(
+        '/auth/refresh',
+        { baseURL: config.public.apiBase, method: 'POST', body: { refresh_token: refreshToken.value } },
+      )
+      setAccessToken(access_token)
+      setRefreshToken(refresh_token)
+      return true
+    } catch (_) {
+      return false
+    }
   }
 
   async function fetchUser () {
@@ -73,21 +102,25 @@ export const useAuthStore = defineStore('auth', () => {
       })
       user.value = received
     } catch (_) {
+      const refreshed = await refreshTokens()
+      if (refreshed) return fetchUser()
       await logout()      // токен «протух»
     }
   }
 
   async function init () {
     const cookie = useCookie<string | null>('token')
-    if (cookie.value) {
-      token.value = cookie.value
+    const refreshCookie = useCookie<string | null>('refresh_token')
+    if (cookie.value) token.value = cookie.value
+    if (refreshCookie.value) refreshToken.value = refreshCookie.value
+    if (token.value) {
       await fetchUser()
     }
     ready.value = true
   }
 
   return {
-    user, token, ready, isAuthenticated,
-    login, register, logout, fetchUser, init,
+    user, token, refreshToken, ready, isAuthenticated,
+    login, register, logout, fetchUser, init, refreshTokens,
   }
 })
