@@ -57,7 +57,7 @@
         v-if="todo.due_date"
         :class="['text-xs mt-1', isOverdue ? 'text-red-500' : 'text-neutral-400']"
       >
-        до {{ formatDate(todo.due_date, true) }}
+        {{ t('todo.expires_until') }} {{ formatDate(todo.due_date, true) }}
       </p>
 
       <!-- Дата создания -->
@@ -109,6 +109,7 @@ defineEmits<{
 const todosStore = useTodosStore()
 const isToggling = ref(false)
 const { locale } = useI18n()
+const { t } = useI18n()
 
 const isOverdue = computed(() => {
   if (!todo.due_date || todo.completed) return false

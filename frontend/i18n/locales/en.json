@@ -31,7 +31,9 @@
     "no_tasks_date": "No tasks for selected date",
     "export_csv": "Export CSV",
     "deleted": "Task deleted",
-    "undo": "Undo"
+    "undo": "Undo",
+    "expires_until": "due by",
+    "export": "The .csv file with plans has been successfully uploaded."
   },
   "login": {
     "welcome": "Welcome",

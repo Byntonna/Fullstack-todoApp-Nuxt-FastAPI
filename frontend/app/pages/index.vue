@@ -231,6 +231,6 @@ function onDateChange(info: any) {
 
 function exportCsv() {
   todosStore.exportCsv(filteredTodos.value)
-  toast('Файл .csv с планами успешно загружен')
+  toast(t('todo.export'))
 }
 </script>
