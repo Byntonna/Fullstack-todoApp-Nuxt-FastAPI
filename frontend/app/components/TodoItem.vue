@@ -1,11 +1,6 @@
 <template>
-  <motion.li
-    :key="todo.id"
+  <div
     class="flex items-center gap-3 p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-700"
-    :initial="{ opacity: 0, x: -20 }"
-    :animate="{ opacity: 1, x: 0 }"
-    :exit="{ opacity: 0, x: -20 }"
-    :transition="{ duration: 0.3, delay }"
   >
     <!-- Checkbox for completion -->
     <Checkbox
@@ -97,7 +92,7 @@
         <Icon name="radix-icons:trash" size="20" style="color: currentColor" />
       </Button>
     </div>
-  </motion.li>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -117,7 +112,7 @@ const props = withDefaults(defineProps<{
   todo: TodoExtended
   delay?: number
 }>(), { delay: 0 })
-const { todo, delay } = props
+const { todo, delay } = toRefs(props)
 
 const todosStore = useTodosStore()
 const isToggling = ref(false)
@@ -127,21 +122,28 @@ const isOverdue = computed(() => {
   if (!todo.due_date || todo.completed) return false
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  return new Date(todo.due_date) < today
+  const due = new Date(todo.due_date)
+  return due < today
 })
 
 async function toggleComplete() {
   if (isToggling.value) return
-  isToggling.value = true
-  await todosStore.toggleComplete(todo.id, todo.completed)
-  isToggling.value = false
+  try {
+    isToggling.value = true
+    await todosStore.toggleTodo(todo.id)
+  } catch (e) {
+    console.error('Не удалось переключить задачу', e)
+  } finally {
+    isToggling.value = false
+  }
 }
 
 function formatDate(dateString: string, onlyDate = false) {
-  // existing formatting logic
+  const loc = locale.value === 'ru' ? 'ru-RU' : 'en-US'
+  return new Date(dateString).toLocaleDateString(loc, {
+    day: 'numeric',
+    month: 'short',
+    ...(onlyDate ? {} : {hour: '2-digit', minute: '2-digit'}),
+  })
 }
 </script>
-
-<style scoped>
-/* Animations handled by motion-v; old CSS keyframes removed */
-</style>

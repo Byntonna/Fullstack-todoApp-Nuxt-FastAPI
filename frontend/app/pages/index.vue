@@ -71,27 +71,49 @@
         :animate="{ opacity: 1, x: 0 }"
         :exit="{ opacity: 0, x: 20 }"
       >
-          <ScrollArea class="space-y-4">
-            <Skeleton v-if="todosStore.loading" v-for="i in 3" :key="i" class="h-20 w-full" />
-
+          <ScrollArea
+    class="relative space-y-4">
+            <div
+              class="absolute inset-y-0 -left-20 w-20 pointer-events-none z-100 bg-gradient-to-r from-background to-transparent"
+            ></div>
+            <div
+              class="absolute inset-y-0 -right-20 w-20 pointer-events-none z-100 bg-gradient-to-l from-background to-transparent"
+            ></div>
+              <Skeleton v-if="todosStore.loading" v-for="i in 3" :key="i" class="h-20 w-full" />
             <p v-else-if="todosStore.todos.length === 0"
                class="text-center text-muted-foreground py-12">
               {{ t('todo.no_tasks') }}
             </p>
-
-            <div class="space-y-4">
-              <AnimatePresence mode="popLayout">
-                <TodoItem
-                  v-for="(todo, i) in filteredTodos"
-                  :key="todo.id"
-                  :todo="todo"
-                  :delay="i * 0.1"
-                  @edit="startEdit"
-                  @delete="deleteTodo"
-                />
-              </AnimatePresence>
-            </div>
-
+            <LayoutGroup v-else>
+              <motion.ul
+              key="list"
+              layout
+              :style="{ position: 'relative' }"
+              class="space-y-4"
+              :initial="{ opacity: 0, x: -20 }"
+              :animate="{ opacity: 1, x: 0 }"
+              :exit="{ opacity: 0, x: -20 }"
+              :transition="{ duration: 0.3 }"
+            >
+                <AnimatePresence>
+                  <motion.li
+                    v-for="(todo, i) in filteredTodos"
+                    :key="todo.id"
+                    layout
+                    :initial="{ opacity: 0, x: -20 }"
+                    :animate="{ opacity: 1, x: 0 }"
+                    :exit="{ opacity: 0, x: -20 }"
+                    :transition="{ duration: 0.3, delay: i * 0.1 }"
+                  >
+                    <TodoItem
+                      :todo="todo"
+                      @edit="startEdit"
+                      @delete="deleteTodo"
+                    />
+                  </motion.li>
+                </AnimatePresence>
+              </motion.ul>
+            </LayoutGroup>
           </ScrollArea>
         </motion.div>
 
@@ -102,6 +124,7 @@
           :initial="{ opacity: 0, x: -20 }"
           :animate="{ opacity: 1, x: 0 }"
           :exit="{ opacity: 0, x: 20 }"
+          :transition="{ duration: 0.3 }"
         >
           <div class="flex flex-col gap-4 md:flex-row">
             <Calendar
@@ -112,7 +135,10 @@
               @event-drop="onDateChange"
             />
             <ScrollArea class="md:w-full md:h-auto h-64 space-y-4">
-              <p v-if="selectedTodos.length === 0" class="text-center text-muted-foreground py-12">
+              <p
+                v-if="selectedTodos.length === 0"
+                class="text-center text-muted-foreground py-12"
+              >
                 {{ t('todo.no_tasks_date') }}
               </p>
               <TodoItem
@@ -151,7 +177,7 @@ import { useI18n } from '#imports'
 import { useTodosStore } from '~/stores/todos'
 import type { Todo } from '~/stores/todos'
 import Modal from '@/components/Modal.vue'
-import { AnimatePresence, motion } from 'motion-v'
+import { AnimatePresence, motion, LayoutGroup } from 'motion-v'
 
 definePageMeta({ middleware: 'auth' })
 
