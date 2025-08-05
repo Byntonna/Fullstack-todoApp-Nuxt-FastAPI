@@ -60,54 +60,68 @@
         <TabsTrigger value="list">{{ t('todo.view_list') }}</TabsTrigger>
         <TabsTrigger value="calendar">{{ t('todo.view_calendar') }}</TabsTrigger>
       </TabsList>
+    </Tabs>
 
       <!-- Список задач -->
-      <TabsContent value="list">
-        <ScrollArea class="space-y-4">
-          <Skeleton v-if="todosStore.loading" v-for="i in 3" :key="i" class="h-20 w-full" />
+      <AnimatePresence mode="wait">
+        <motion.div
+        v-if="view === 'list'"
+        key="list"
+        :initial="{ opacity: 0, x: -20 }"
+        :animate="{ opacity: 1, x: 0 }"
+        :exit="{ opacity: 0, x: 20 }"
+      >
+          <ScrollArea class="space-y-4">
+            <Skeleton v-if="todosStore.loading" v-for="i in 3" :key="i" class="h-20 w-full" />
 
-          <p v-else-if="todosStore.todos.length === 0"
-             class="text-center text-muted-foreground py-12">
-            {{ t('todo.no_tasks') }}
-          </p>
-
-          <TransitionGroup v-else name="todo" tag="div" class="space-y-4">
-            <TodoItem
-              v-for="todo in filteredTodos"
-              :key="todo.id"
-              :todo="todo"
-              @edit="startEdit"
-              @delete="deleteTodo"
-            />
-          </TransitionGroup>
-        </ScrollArea>
-      </TabsContent>
-
-      <!-- Календарь -->
-      <TabsContent value="calendar">
-        <div class="flex flex-col gap-4 md:flex-row">
-          <Calendar
-            v-model="selectedDate"
-            :events="calendarEvents"
-            editable
-            droppable
-            @event-drop="onDateChange"
-          />
-          <ScrollArea class="md:w-full md:h-auto h-64 space-y-4">
-            <p v-if="selectedTodos.length === 0" class="text-center text-muted-foreground py-12">
-              {{ t('todo.no_tasks_date') }}
+            <p v-else-if="todosStore.todos.length === 0"
+               class="text-center text-muted-foreground py-12">
+              {{ t('todo.no_tasks') }}
             </p>
-            <TodoItem
-              v-for="todo in selectedTodos"
-              :key="todo.id"
-              :todo="todo"
-              @edit="startEdit"
-              @delete="deleteTodo"
-            />
+
+            <TransitionGroup v-else name="todo" tag="div" class="space-y-4">
+              <TodoItem
+                v-for="todo in filteredTodos"
+                :key="todo.id"
+                :todo="todo"
+                @edit="startEdit"
+                @delete="deleteTodo"
+              />
+            </TransitionGroup>
           </ScrollArea>
-        </div>
-      </TabsContent>
-    </Tabs>
+        </motion.div>
+
+        <!-- Календарь -->
+        <motion.div
+          v-if="view === 'calendar'"
+          key="calendar"
+          :initial="{ opacity: 0, x: 20 }"
+          :animate="{ opacity: 1, x: 0 }"
+          :exit="{ opacity: 0, x: -20 }"
+        >
+          <div class="flex flex-col gap-4 md:flex-row">
+            <Calendar
+              v-model="selectedDate"
+              :events="calendarEvents"
+              editable
+              droppable
+              @event-drop="onDateChange"
+            />
+            <ScrollArea class="md:w-full md:h-auto h-64 space-y-4">
+              <p v-if="selectedTodos.length === 0" class="text-center text-muted-foreground py-12">
+                {{ t('todo.no_tasks_date') }}
+              </p>
+              <TodoItem
+                v-for="todo in selectedTodos"
+                :key="todo.id"
+                :todo="todo"
+                @edit="startEdit"
+                @delete="deleteTodo"
+              />
+            </ScrollArea>
+          </div>
+        </motion.div>
+      </AnimatePresence>
 
     <!-- Экспорт -->
     <div class="flex gap-2">
@@ -124,8 +138,6 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ middleware: 'auth' })
-
 import { ref, computed, onMounted } from 'vue'
 import { Tabs } from "~/components/ui/tabs"
 import { toast } from 'vue-sonner'
@@ -135,6 +147,10 @@ import { useI18n } from '#imports'
 import { useTodosStore } from '~/stores/todos'
 import type { Todo } from '~/stores/todos'
 import Modal from '@/components/Modal.vue'
+import { AnimatePresence, motion } from 'motion-v'
+
+definePageMeta({ middleware: 'auth' })
+
 const { t } = useI18n()
 
 const todosStore = useTodosStore()
