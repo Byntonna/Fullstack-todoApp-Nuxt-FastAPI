@@ -79,15 +79,19 @@
               {{ t('todo.no_tasks') }}
             </p>
 
-            <TransitionGroup v-else name="todo" tag="div" class="space-y-4">
-              <TodoItem
-                v-for="todo in filteredTodos"
-                :key="todo.id"
-                :todo="todo"
-                @edit="startEdit"
-                @delete="deleteTodo"
-              />
-            </TransitionGroup>
+            <div class="space-y-4">
+              <AnimatePresence mode="popLayout">
+                <TodoItem
+                  v-for="(todo, i) in filteredTodos"
+                  :key="todo.id"
+                  :todo="todo"
+                  :delay="i * 0.1"
+                  @edit="startEdit"
+                  @delete="deleteTodo"
+                />
+              </AnimatePresence>
+            </div>
+
           </ScrollArea>
         </motion.div>
 
@@ -95,9 +99,9 @@
         <motion.div
           v-if="view === 'calendar'"
           key="calendar"
-          :initial="{ opacity: 0, x: 20 }"
+          :initial="{ opacity: 0, x: -20 }"
           :animate="{ opacity: 1, x: 0 }"
-          :exit="{ opacity: 0, x: -20 }"
+          :exit="{ opacity: 0, x: 20 }"
         >
           <div class="flex flex-col gap-4 md:flex-row">
             <Calendar
@@ -126,11 +130,11 @@
     <!-- Экспорт -->
     <div class="flex gap-2">
       <Button variant="outline" @click="exportCsv">
-        <Icon name="radix-icons:download" class="mr-2 h-4 w-4" />
+        <Icon name="radix-icons:download" class="mr-2 h-4 w-4" style="color: currentColor"/>
         {{ t('todo.export_csv') }}
       </Button>
       <Button variant="outline" @click="exportAnki">
-        <Icon name="radix-icons:star" class="mr-2 h-4 w-4 rotate-[-15deg]" />
+        <Icon name="radix-icons:star" class="mr-2 h-4 w-4 rotate-[-15deg]" style="color: currentColor"/>
         {{ t('todo.export_anki') }}
       </Button>
     </div>
