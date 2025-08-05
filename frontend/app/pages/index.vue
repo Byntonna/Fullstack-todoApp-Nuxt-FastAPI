@@ -62,58 +62,81 @@
       </TabsList>
     </Tabs>
 
+    <div class="min-h-[200px] transition-all duration-300 ease-in-out">
       <!-- Список задач -->
       <AnimatePresence mode="wait">
         <motion.div
-        v-if="view === 'list'"
-        key="list"
-        :initial="{ opacity: 0, x: -20 }"
-        :animate="{ opacity: 1, x: 0 }"
-        :exit="{ opacity: 0, x: 20 }"
-      >
-          <ScrollArea
-    class="relative space-y-4">
+          v-if="view === 'list'"
+          key="list"
+          :initial="{ opacity: 0, x: -20 }"
+          :animate="{ opacity: 1, x: 0 }"
+          :exit="{ opacity: 0, x: 20 }"
+        >
+          <ScrollArea class="relative">
             <div
               class="absolute inset-y-0 -left-20 w-20 pointer-events-none z-100 bg-gradient-to-r from-background to-transparent"
             ></div>
             <div
               class="absolute inset-y-0 -right-20 w-20 pointer-events-none z-100 bg-gradient-to-l from-background to-transparent"
             ></div>
-              <Skeleton v-if="todosStore.loading" v-for="i in 3" :key="i" class="h-20 w-full" />
-            <p v-else-if="todosStore.todos.length === 0"
-               class="text-center text-muted-foreground py-12">
-              {{ t('todo.no_tasks') }}
-            </p>
-            <LayoutGroup v-else>
-              <motion.ul
-              key="list"
-              layout
-              :style="{ position: 'relative' }"
-              class="space-y-4"
-              :initial="{ opacity: 0, x: -20 }"
-              :animate="{ opacity: 1, x: 0 }"
-              :exit="{ opacity: 0, x: -20 }"
-              :transition="{ duration: 0.3 }"
+
+            <div
+              ref="contentContainer"
+              class="transition-all duration-300 ease-in-out overflow-hidden"
+              :style="{ height: contentHeight }"
             >
-                <AnimatePresence>
-                  <motion.li
-                    v-for="(todo, i) in filteredTodos"
-                    :key="todo.id"
+              <motion.div
+                layout
+                class="space-y-4"
+                :transition="{ layout: { duration: 0.3 } }"
+              >
+                <template v-if="todosStore.loading">
+                  <Skeleton v-for="i in 3" :key="i" class="h-20 w-full" />
+                </template>
+                <p
+                  v-else-if="todosStore.todos.length === 0"
+                  class="text-center text-muted-foreground py-12"
+                >
+                  {{ t('todo.no_tasks') }}
+                </p>
+                <p
+                  v-else-if="filteredTodos.length === 0"
+                  class="text-center text-muted-foreground py-12"
+                >
+                  {{ t('todo.no_results') }}
+                </p>
+                <LayoutGroup v-else>
+                  <motion.ul
+                    key="list"
                     layout
+                    :style="{ position: 'relative' }"
+                    class="space-y-4"
                     :initial="{ opacity: 0, x: -20 }"
                     :animate="{ opacity: 1, x: 0 }"
                     :exit="{ opacity: 0, x: -20 }"
-                    :transition="{ duration: 0.3, delay: i * 0.1 }"
+                    :transition="{ duration: 0.3 }"
                   >
-                    <TodoItem
-                      :todo="todo"
-                      @edit="startEdit"
-                      @delete="deleteTodo"
-                    />
-                  </motion.li>
-                </AnimatePresence>
-              </motion.ul>
-            </LayoutGroup>
+                    <AnimatePresence>
+                      <motion.li
+                        v-for="(todo, i) in filteredTodos"
+                        :key="todo.id"
+                        layout
+                        :initial="{ opacity: 0, x: -20 }"
+                        :animate="{ opacity: 1, x: 0 }"
+                        :exit="{ opacity: 0, x: -20 }"
+                        :transition="{ duration: 0.3, delay: i * 0.1 }"
+                      >
+                        <TodoItem
+                          :todo="todo"
+                          @edit="startEdit"
+                          @delete="deleteTodo"
+                        />
+                      </motion.li>
+                    </AnimatePresence>
+                  </motion.ul>
+                </LayoutGroup>
+              </motion.div>
+            </div>
           </ScrollArea>
         </motion.div>
 
@@ -152,6 +175,7 @@
           </div>
         </motion.div>
       </AnimatePresence>
+    </div>
 
     <!-- Экспорт -->
     <div class="flex gap-2">
@@ -168,7 +192,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { Tabs } from "~/components/ui/tabs"
 import { toast } from 'vue-sonner'
 import { ScrollArea } from "~/components/ui/scroll-area"
@@ -196,6 +220,9 @@ const editingTodo = ref<Todo | null>(null);
 const formLoading = ref(false)
 const showForm = ref(false)
 const selectedDate = ref<Date | null>(null)
+
+const contentContainer = ref<HTMLElement>()
+const contentHeight = ref('auto')
 
 /**
  * вычисления
@@ -225,6 +252,22 @@ const greeting = computed(() => {
   if (hour < 18) return t('greeting.day')
   return t('greeting.evening')
 })
+
+async function updateContentHeight() {
+  await nextTick()
+  if (contentContainer.value) {
+    const originalHeight = contentContainer.value.style.height
+    contentContainer.value.style.height = 'auto'
+    const newHeight = contentContainer.value.scrollHeight
+    contentContainer.value.style.height = originalHeight
+
+    contentHeight.value = `${newHeight}px`
+  }
+}
+
+watch([filteredTodos, () => todosStore.loading], () => {
+  updateContentHeight()
+}, { immediate: true })
 
 onMounted(() => {
   todosStore.fetchTodos()

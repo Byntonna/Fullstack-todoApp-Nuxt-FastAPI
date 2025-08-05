@@ -29,6 +29,7 @@
     "view_calendar": "Calendar",
     "no_tasks": "No tasks yet. Create your first one!",
     "no_tasks_date": "No tasks for selected date",
+    "no_results": "No tasks match your search",
     "export_csv": "Export CSV",
     "export_anki": "Export to Anki",
     "deleted": "Task deleted",
