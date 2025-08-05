@@ -110,10 +110,16 @@
     </Tabs>
 
     <!-- Экспорт -->
-    <Button variant="outline" @click="exportCsv">
-      <Icon name="lucide:file-down" class="mr-2 h-4 w-4" />
-      {{ t('todo.export_csv') }}
-    </Button>
+    <div class="flex gap-2">
+      <Button variant="outline" @click="exportCsv">
+        <Icon name="radix-icons:download" class="mr-2 h-4 w-4" />
+        {{ t('todo.export_csv') }}
+      </Button>
+      <Button variant="outline" @click="exportAnki">
+        <Icon name="radix-icons:star" class="mr-2 h-4 w-4 rotate-[-15deg]" />
+        {{ t('todo.export_anki') }}
+      </Button>
+    </div>
   </div>
 </template>
 
@@ -245,6 +251,11 @@ function onDateChange(info: any) {
 
 function exportCsv() {
   todosStore.exportCsv(filteredTodos.value)
+  toast(t('todo.export'))
+}
+
+function exportAnki() {
+  todosStore.exportAnki(filteredTodos.value)
   toast(t('todo.export'))
 }
 </script>

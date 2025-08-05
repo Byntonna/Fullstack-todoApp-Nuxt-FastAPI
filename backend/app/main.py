@@ -3,7 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from . import models
 from .database import engine
-from .routes import todos, auth, categories, tags
+from .routes import todos, auth, categories, tags, anki_export
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -25,6 +25,7 @@ app.include_router(auth.router)
 app.include_router(todos.router)
 app.include_router(categories.router)
 app.include_router(tags.router)
+app.include_router(anki_export.router)
 
 @app.get("/")
 async def root():

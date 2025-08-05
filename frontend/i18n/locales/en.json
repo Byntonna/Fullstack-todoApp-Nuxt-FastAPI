@@ -30,10 +30,11 @@
     "no_tasks": "No tasks yet. Create your first one!",
     "no_tasks_date": "No tasks for selected date",
     "export_csv": "Export CSV",
+    "export_anki": "Export to Anki",
     "deleted": "Task deleted",
     "undo": "Undo",
     "expires_until": "due by",
-    "export": "The .csv file with plans has been successfully uploaded."
+    "export": "The file with plans has been successfully downloaded"
   },
   "login": {
     "welcome": "Welcome",

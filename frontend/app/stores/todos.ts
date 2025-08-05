@@ -188,6 +188,38 @@ export const useTodosStore = defineStore('todos', {
       URL.revokeObjectURL(url)
     },
 
+    async exportAnki(list: Todo[] = this.todos) {
+      if (import.meta.server) return
+      if (!list.length) return
+
+      const header = ['Front', 'Back']
+      const quote = (value: string | number | undefined | null) => {
+        const str = (value ?? '')
+          .toString()
+          .replace(/"/g, '""')
+          .replace(/\r?\n/g, '<br>')
+        return `"${str}"`
+      }
+
+      const rows = list.map(t => [
+        quote(t.title),
+        quote(t.description)
+      ])
+
+      const csv = [header, ...rows].map(r => r.join(',')).join('\r\n')
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `anki_${new Date().toISOString().slice(0,10)}.csv`
+      link.style.display = 'none'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    },
+
     async updateTodo(
       id: number,
       updates: Partial<Pick<Todo, 'title' | 'description' | 'completed' | 'priority' | 'due_date'>> & {
