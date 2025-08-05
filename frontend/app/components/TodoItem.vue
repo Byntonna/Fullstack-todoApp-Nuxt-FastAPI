@@ -1,10 +1,13 @@
 <template>
-  <li
+  <motion.li
     :key="todo.id"
-    class="flex items-center gap-3 p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-700 todo-item"
-    :style="{ animationDelay: (props.delay ?? 0) + 's' }"
+    class="flex items-center gap-3 p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-700"
+    :initial="{ opacity: 0, x: -20 }"
+    :animate="{ opacity: 1, x: 0 }"
+    :exit="{ opacity: 0, x: -20 }"
+    :transition="{ duration: 0.3, delay }"
   >
-    <!-- Чекбокс для отметки выполнения -->
+    <!-- Checkbox for completion -->
     <Checkbox
       class="flex-shrink-0 dark:border-neutral-200"
       :model-value="todo.completed"
@@ -12,7 +15,7 @@
       @update:model-value="toggleComplete"
     />
 
-    <!-- Содержимое задачи -->
+    <!-- Task content -->
     <div class="flex-1 min-w-0">
       <div class="flex items-center gap-2">
         <h3
@@ -22,22 +25,20 @@
           {{ todo.title }}
         </h3>
 
-        <!-- Бейдж приоритета -->
+        <!-- Priority badge -->
         <div v-if="todo.priority" class="flex items-center">
           <template v-if="todo.priority === 'P3'">
             <div class="flex items-center bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 rounded-full px-2">
               <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
             </div>
           </template>
-
           <template v-else-if="todo.priority === 'P2'">
             <div class="flex items-center -space-x-4 bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 rounded-full px-2">
               <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
               <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
             </div>
           </template>
-
-          <template v-else-if="todo.priority === 'P1'">
+          <template v-else>
             <div class="flex items-center -space-x-4 bg-red-100 dark:bg-red-900/40 dark:text-red-300 rounded-full px-2">
               <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
               <Icon name="tabler:exclamation-mark" size="20" style="color: currentColor" />
@@ -47,7 +48,7 @@
         </div>
       </div>
 
-      <!-- Описание -->
+      <!-- Description -->
       <p
         v-if="todo.description"
         :class="{ 'line-through text-neutral-400 dark:text-neutral-500': todo.completed }"
@@ -56,11 +57,12 @@
         {{ todo.description }}
       </p>
 
+      <!-- Category -->
       <p v-if="todo.category" class="text-xs mt-1 text-blue-600 dark:text-blue-300">
         {{ todo.category.name }}
       </p>
 
-      <!-- Теги -->
+      <!-- Tags -->
       <div v-if="todo.tags && todo.tags.length" class="flex flex-wrap gap-1 mt-1">
         <span
           v-for="tag in todo.tags"
@@ -71,42 +73,35 @@
         </span>
       </div>
 
-      <!-- Срок выполнения -->
+      <!-- Due date and overdue status -->
       <p
         v-if="todo.due_date"
         :class="['text-xs mt-1', isOverdue ? 'text-red-500 dark:text-red-400' : 'text-neutral-400 dark:text-neutral-500']"
       >
         {{ t('todo.expires_until') }} {{ formatDate(todo.due_date, true) }}
+        <span v-if="isOverdue" class="text-destructive ml-2">({{ t('todo.overdue') }})</span>
       </p>
 
-      <!-- Дата создания -->
+      <!-- Created at -->
       <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-2">
         {{ formatDate(todo.created_at) }}
       </p>
     </div>
 
-    <!-- Действия -->
+    <!-- Actions -->
     <div class="flex gap-2 flex-shrink-0">
-      <Button
-        size="sm"
-        color="gray"
-        variant="ghost"
-        @click="$emit('edit', todo)"
-      >
-        <Icon name="radix-icons:pencil-1" size="20" style="color: currentColor"/>
+      <Button size="sm" variant="outline" @click="$emit('edit', todo)">
+        <Icon name="radix-icons:pencil-1" size="20" style="color: currentColor" />
       </Button>
-      <Button
-        size="sm"
-        variant="ghost"
-        @click="$emit('delete', todo.id)"
-      >
-        <Icon name="radix-icons:trash" size="20" style="color: red" />
+      <Button size="sm" variant="destructive" @click="$emit('delete', todo.id)">
+        <Icon name="radix-icons:trash" size="20" style="color: currentColor" />
       </Button>
     </div>
-  </li>
+  </motion.li>
 </template>
 
 <script setup lang="ts">
+import { motion } from 'motion-v'
 import { ref, computed } from 'vue'
 import { useTodosStore } from '~/stores/todos'
 import { Checkbox } from '~/components/ui/checkbox'
@@ -118,18 +113,11 @@ interface TodoExtended extends Todo {
   due_date?: string | null
 }
 
-/* ────────────────────────────────────────────────
-   Один-единственный defineProps со всеми полями   */
 const props = withDefaults(defineProps<{
   todo: TodoExtended
-  delay?: number        // необязательный, по умолчанию 0
-}>(), {
-  delay: 0
-})
-
-/* Можно деструктурировать, если так привычнее */
+  delay?: number
+}>(), { delay: 0 })
 const { todo, delay } = props
-/* ──────────────────────────────────────────────── */
 
 const todosStore = useTodosStore()
 const isToggling = ref(false)
@@ -142,16 +130,18 @@ const isOverdue = computed(() => {
   return new Date(todo.due_date) < today
 })
 
-async function toggleComplete() { /* …без изменений… */ }
+async function toggleComplete() {
+  if (isToggling.value) return
+  isToggling.value = true
+  await todosStore.toggleComplete(todo.id, todo.completed)
+  isToggling.value = false
+}
 
-function formatDate(dateString: string, onlyDate = false) { /* … */ }
+function formatDate(dateString: string, onlyDate = false) {
+  // existing formatting logic
+}
 </script>
 
 <style scoped>
-.todo-item {
-  opacity: 0;
-  transform: translateX(-20px);
-  animation: slideIn 0.3s ease-out forwards;
-}
-@keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+/* Animations handled by motion-v; old CSS keyframes removed */
 </style>
