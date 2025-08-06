@@ -105,13 +105,12 @@
                       <p class="text-center text-muted-foreground py-12">{{ t('todo.no_tasks') }}</p>
                     </template>
                     <template v-else>
-                      <div>
+                      <div class="space-y-4">
                         <motion.div
                           v-for="(todo, index) in stableTodos"
                           :key="todo.id"
                           layout="position"
                         >
-                          <!-- Теперь AnimatePresence оборачивает только motion.div -->
                           <AnimatePresence mode="wait" :initial="false">
                             <motion.div
                               :initial="{ opacity: 0, y: 20 }"
