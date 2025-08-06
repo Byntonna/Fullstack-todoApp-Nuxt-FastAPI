@@ -66,79 +66,43 @@
       <!-- Список задач -->
       <div v-if="view === 'list'" class="relative">
         <ScrollArea class="relative">
-          <div
-            class="absolute inset-y-0 -left-20 w-20 pointer-events-none z-50 bg-gradient-to-r from-background to-transparent"
-          ></div>
-          <div
-            class="absolute inset-y-0 -right-20 w-20 pointer-events-none z-50 bg-gradient-to-l from-background to-transparent"
-          ></div>
-
-          <div
-            ref="contentContainer"
-            class="transition-all duration-300 ease-in-out overflow-hidden"
-            :style="{ minHeight: contentHeight }"
-          >
-            <LayoutGroup>
-              <div class="space-y-4">
-                <template v-if="todosStore.loading">
-                  <Skeleton v-for="i in 3" :key="i" class="h-20 w-full" />
-                </template>
-                <p
-                  v-else-if="todosStore.todos.length === 0"
-                  class="text-center text-muted-foreground py-12"
+          <!-- Убираем избыточный LayoutGroup -->
+          <LayoutGroup>
+            <div class="space-y-4">
+              <template v-if="todosStore.loading">
+                <Skeleton v-for="i in 3" :key="i" class="h-20 w-full" />
+              </template>
+              <p v-else-if="todosStore.todos.length === 0" class="text-center text-muted-foreground py-12">
+                {{ t('todo.no_tasks') }}
+              </p>
+              <p v-else-if="filteredTodos.length === 0" class="text-center text-muted-foreground py-12">
+                {{ t('todo.no_results') }}
+              </p>
+              <div v-else class="space-y-4">
+                <!-- Простая структура с одним motion.div -->
+                <motion.div
+                  v-for="(todo, index) in filteredTodos"
+                  :key="todo.id"
+                  layout
+                  :initial="{ opacity: 0, y: 20 }"
+                  :animate="{ opacity: 1, y: 0 }"
+                  :exit="{ opacity: 0, y: -20 }"
+                  :transition="{
+                    type: 'spring',
+                    stiffness: 300,
+                    damping: 20,
+                    delay: index * 0.05
+                  }"
                 >
-                  {{ t('todo.no_tasks') }}
-                </p>
-                <p
-                  v-else-if="filteredTodos.length === 0"
-                  class="text-center text-muted-foreground py-12"
-                >
-                  {{ t('todo.no_results') }}
-                </p>
-                <div v-else>
-                  <LayoutGroup>
-                  <div class="space-y-4">
-                    <template v-if="todosStore.loading">
-                      <Skeleton v-for="i in 3" :key="i" class="h-20 w-full" />
-                    </template>
-                    <template v-else-if="stableTodos.length === 0">
-                      <p class="text-center text-muted-foreground py-12">{{ t('todo.no_tasks') }}</p>
-                    </template>
-                    <template v-else>
-                      <div class="space-y-4">
-                        <motion.div
-                          v-for="(todo, index) in stableTodos"
-                          :key="todo.id"
-                          layout="position"
-                        >
-                          <AnimatePresence mode="wait" :initial="false">
-                            <motion.div
-                              :initial="{ opacity: 0, y: 20 }"
-                              :animate="{ opacity: 1, y: 0 }"
-                              :exit="{ opacity: 0, y: -20 }"
-                              :transition="{
-                                duration: 0.3,
-                                delay: isFiltering ? 0 : index * 0.05,
-                                layout: { duration: 0.3 }
-                              }"
-                              class="transform-gpu"
-                            >
-                              <TodoItem
-                                :todo="todo"
-                                @edit="startEdit"
-                                @delete="deleteTodo"
-                              />
-                            </motion.div>
-                          </AnimatePresence>
-                        </motion.div>
-                      </div>
-                    </template>
-                  </div>
-                </LayoutGroup>
-                </div>
+                  <TodoItem
+                    :todo="todo"
+                    @edit="startEdit"
+                    @delete="deleteTodo"
+                  />
+                </motion.div>
               </div>
-            </LayoutGroup>
-          </div>
+            </div>
+          </LayoutGroup>
         </ScrollArea>
       </div>
 
