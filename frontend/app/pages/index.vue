@@ -64,7 +64,6 @@
 
     <div class="min-h-[200px] transition-all duration-300 ease-in-out">
       <!-- Список задач -->
-      <AnimatePresence mode="wait">
         <motion.div
           v-if="view === 'list'"
           key="list"
@@ -74,10 +73,10 @@
         >
           <ScrollArea class="relative">
             <div
-              class="absolute inset-y-0 -left-20 w-20 pointer-events-none z-100 bg-gradient-to-r from-background to-transparent"
+              class="absolute inset-y-0 -left-20 w-20 pointer-events-none z-50 bg-gradient-to-r from-background to-transparent"
             ></div>
             <div
-              class="absolute inset-y-0 -right-20 w-20 pointer-events-none z-100 bg-gradient-to-l from-background to-transparent"
+              class="absolute inset-y-0 -right-20 w-20 pointer-events-none z-50  bg-gradient-to-l from-background to-transparent"
             ></div>
 
             <div
@@ -106,9 +105,8 @@
                   {{ t('todo.no_results') }}
                 </p>
                 <div v-else>
-                  <motion.ul
+                    <motion.ul
                     key="list"
-                    layout
                     :style="{ position: 'relative' }"
                     class="space-y-4"
                     :initial="{ opacity: 0, x: -20 }"
@@ -116,7 +114,7 @@
                     :exit="{ opacity: 0, x: -20 }"
                     :transition="{ duration: 0.3 }"
                   >
-                    <AnimatePresence>
+                    <AnimatePresence mode="popLayout" :initial="false">
                       <motion.li
                         v-for="(todo, i) in filteredTodos"
                         :key="`todo-${todo.id}`"
@@ -174,7 +172,6 @@
             </ScrollArea>
           </div>
         </motion.div>
-      </AnimatePresence>
     </div>
 
     <!-- Экспорт -->
@@ -202,6 +199,7 @@ import { useTodosStore } from '~/stores/todos'
 import type { Todo } from '~/stores/todos'
 import Modal from '@/components/Modal.vue'
 import { AnimatePresence, motion, LayoutGroup } from 'motion-v'
+import { debounce } from 'lodash-es'
 
 definePageMeta({ middleware: 'auth' })
 
