@@ -64,31 +64,22 @@
 
     <div class="min-h-[200px] transition-all duration-300 ease-in-out">
       <!-- Список задач -->
-        <motion.div
-          v-if="view === 'list'"
-          key="list"
-          :initial="{ opacity: 0, x: -20 }"
-          :animate="{ opacity: 1, x: 0 }"
-          :exit="{ opacity: 0, x: 20 }"
-        >
-          <ScrollArea class="relative">
-            <div
-              class="absolute inset-y-0 -left-20 w-20 pointer-events-none z-50 bg-gradient-to-r from-background to-transparent"
-            ></div>
-            <div
-              class="absolute inset-y-0 -right-20 w-20 pointer-events-none z-50  bg-gradient-to-l from-background to-transparent"
-            ></div>
+      <div v-if="view === 'list'" class="relative">
+        <ScrollArea class="relative">
+          <div
+            class="absolute inset-y-0 -left-20 w-20 pointer-events-none z-50 bg-gradient-to-r from-background to-transparent"
+          ></div>
+          <div
+            class="absolute inset-y-0 -right-20 w-20 pointer-events-none z-50 bg-gradient-to-l from-background to-transparent"
+          ></div>
 
-            <div
-              ref="contentContainer"
-              class="transition-all duration-300 ease-in-out overflow-hidden"
-              :style="{ height: contentHeight }"
-            >
-              <motion.div
-                layout
-                class="space-y-4"
-                :transition="{ layout: { duration: 0.3 } }"
-              >
+          <div
+            ref="contentContainer"
+            class="transition-all duration-300 ease-in-out overflow-hidden"
+            :style="{ minHeight: contentHeight }"
+          >
+            <LayoutGroup>
+              <div class="space-y-4">
                 <template v-if="todosStore.loading">
                   <Skeleton v-for="i in 3" :key="i" class="h-20 w-full" />
                 </template>
@@ -105,73 +96,80 @@
                   {{ t('todo.no_results') }}
                 </p>
                 <div v-else>
-                    <motion.ul
-                    key="list"
-                    :style="{ position: 'relative' }"
-                    class="space-y-4"
-                    :initial="{ opacity: 0, x: -20 }"
-                    :animate="{ opacity: 1, x: 0 }"
-                    :exit="{ opacity: 0, x: -20 }"
-                    :transition="{ duration: 0.3 }"
-                  >
-                    <AnimatePresence mode="popLayout" :initial="false">
-                      <motion.li
-                        v-for="(todo, i) in filteredTodos"
-                        :key="`todo-${todo.id}`"
-                        layout
-                        :initial="{ opacity: 0, x: -20 }"
-                        :animate="{ opacity: 1, x: 0 }"
-                        :exit="{ opacity: 0, x: -20 }"
-                        :transition="{ duration: 0.3, delay: i * 0.1 }"
-                      >
-                        <TodoItem
-                          :todo="todo"
-                          @edit="startEdit"
-                          @delete="deleteTodo"
-                        />
-                      </motion.li>
-                    </AnimatePresence>
-                  </motion.ul>
+                  <LayoutGroup>
+                  <div class="space-y-4">
+                    <template v-if="todosStore.loading">
+                      <Skeleton v-for="i in 3" :key="i" class="h-20 w-full" />
+                    </template>
+                    <template v-else-if="stableTodos.length === 0">
+                      <p class="text-center text-muted-foreground py-12">{{ t('todo.no_tasks') }}</p>
+                    </template>
+                    <template v-else>
+                      <div>
+                        <motion.div
+                          v-for="(todo, index) in stableTodos"
+                          :key="todo.id"
+                          layout="position"
+                        >
+                          <!-- Теперь AnimatePresence оборачивает только motion.div -->
+                          <AnimatePresence mode="wait" :initial="false">
+                            <motion.div
+                              :initial="{ opacity: 0, y: 20 }"
+                              :animate="{ opacity: 1, y: 0 }"
+                              :exit="{ opacity: 0, y: -20 }"
+                              :transition="{
+                                duration: 0.3,
+                                delay: isFiltering ? 0 : index * 0.05,
+                                layout: { duration: 0.3 }
+                              }"
+                              class="transform-gpu"
+                            >
+                              <TodoItem
+                                :todo="todo"
+                                @edit="startEdit"
+                                @delete="deleteTodo"
+                              />
+                            </motion.div>
+                          </AnimatePresence>
+                        </motion.div>
+                      </div>
+                    </template>
+                  </div>
+                </LayoutGroup>
                 </div>
-              </motion.div>
-            </div>
-          </ScrollArea>
-        </motion.div>
-
-        <!-- Календарь -->
-        <motion.div
-          v-if="view === 'calendar'"
-          key="calendar"
-          :initial="{ opacity: 0, x: -20 }"
-          :animate="{ opacity: 1, x: 0 }"
-          :exit="{ opacity: 0, x: 20 }"
-          :transition="{ duration: 0.3 }"
-        >
-          <div class="flex flex-col gap-4 md:flex-row">
-            <Calendar
-              v-model="selectedDate"
-              :events="calendarEvents"
-              editable
-              droppable
-              @event-drop="onDateChange"
-            />
-            <ScrollArea class="md:w-full md:h-auto h-64 space-y-4">
-              <p
-                v-if="selectedTodos.length === 0"
-                class="text-center text-muted-foreground py-12"
-              >
-                {{ t('todo.no_tasks_date') }}
-              </p>
-              <TodoItem
-                v-for="todo in selectedTodos"
-                :key="todo.id"
-                :todo="todo"
-                @edit="startEdit"
-                @delete="deleteTodo"
-              />
-            </ScrollArea>
+              </div>
+            </LayoutGroup>
           </div>
-        </motion.div>
+        </ScrollArea>
+      </div>
+
+      <!-- Календарь -->
+      <div v-if="view === 'calendar'">
+        <div class="flex flex-col gap-4 md:flex-row">
+          <Calendar
+            v-model="selectedDate"
+            :events="calendarEvents"
+            editable
+            droppable
+            @event-drop="onDateChange"
+          />
+          <ScrollArea class="md:w-full md:h-auto h-64 space-y-4">
+            <p
+              v-if="selectedTodos.length === 0"
+              class="text-center text-muted-foreground py-12"
+            >
+              {{ t('todo.no_tasks_date') }}
+            </p>
+            <TodoItem
+              v-for="todo in selectedTodos"
+              :key="todo.id"
+              :todo="todo"
+              @edit="startEdit"
+              @delete="deleteTodo"
+            />
+          </ScrollArea>
+        </div>
+      </div>
     </div>
 
     <!-- Экспорт -->
@@ -210,17 +208,19 @@ const todosStore = useTodosStore()
 /**
  * локальные состояния
  */
-const query     = ref('')
-const priority  = ref<string[]>([])
-const sort      = ref<'due' | 'created' | 'priority'>('due')
-const view      = ref<'list' | 'calendar'>('list')
+const query = ref('')
+const priority = ref<string[]>([])
+const sort = ref<'due' | 'created' | 'priority'>('due')
+const view = ref<'list' | 'calendar'>('list')
 const editingTodo = ref<Todo | null>(null);
 const formLoading = ref(false)
 const showForm = ref(false)
 const selectedDate = ref<Date | null>(null)
 
 const contentContainer = ref<HTMLElement>()
-const contentHeight = ref('auto')
+const contentHeight = ref('200px')
+const listKey = ref(0)
+const isFiltering = ref(false)
 
 /**
  * вычисления
@@ -228,6 +228,23 @@ const contentHeight = ref('auto')
 const filteredTodos = computed(() =>
   todosStore.filterAndSort({ query: query.value, priority: priority.value, sort: sort.value })
 )
+
+// Стабильная версия списка для анимации
+const stableTodos = ref<Todo[]>([])
+
+// Дебаунс для обновления стабильного списка
+const updateStableTodos = debounce(() => {
+  isFiltering.value = true
+  stableTodos.value = [...filteredTodos.value]
+  listKey.value++
+
+  nextTick(() => {
+    setTimeout(() => {
+      isFiltering.value = false
+    }, 300)
+  })
+}, 150)
+
 const calendarEvents = computed(() =>
   filteredTodos.value.map(t => ({
     id: t.id,
@@ -236,6 +253,7 @@ const calendarEvents = computed(() =>
     allDay: true
   }))
 )
+
 const selectedTodos = computed(() =>
   filteredTodos.value.filter(t => {
     if (!selectedDate.value || !t.due_date) return false
@@ -254,22 +272,27 @@ const greeting = computed(() => {
 async function updateContentHeight() {
   await nextTick()
   if (contentContainer.value) {
-    const originalHeight = contentContainer.value.style.height
-    contentContainer.value.style.height = 'auto'
-    const newHeight = contentContainer.value.scrollHeight
-    contentContainer.value.style.height = originalHeight
-
-    contentHeight.value = `${newHeight}px`
+    const scrollHeight = contentContainer.value.scrollHeight
+    contentHeight.value = Math.max(200, scrollHeight) + 'px'
   }
 }
 
-// Исправление бага с высотой - добавляем flush: 'post' для обновления после рендера
-watch([filteredTodos, () => todosStore.loading, query, priority, sort], () => {
+// Отслеживание изменений для обновления списка
+watch(filteredTodos, () => {
+  updateStableTodos()
   updateContentHeight()
-}, { immediate: true, flush: 'post' })
+}, { immediate: true, deep: true })
 
-onMounted(() => {
-  todosStore.fetchTodos()
+// Отслеживание загрузки
+watch(() => todosStore.loading, () => {
+  updateContentHeight()
+})
+
+// Инициализация
+onMounted(async () => {
+  await todosStore.fetchTodos()
+  stableTodos.value = [...filteredTodos.value]
+  updateContentHeight()
 })
 
 /**
