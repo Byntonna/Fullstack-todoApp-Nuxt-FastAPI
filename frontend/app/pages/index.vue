@@ -105,7 +105,7 @@
                 >
                   {{ t('todo.no_results') }}
                 </p>
-                <LayoutGroup v-else>
+                <div v-else>
                   <motion.ul
                     key="list"
                     layout
@@ -119,7 +119,7 @@
                     <AnimatePresence>
                       <motion.li
                         v-for="(todo, i) in filteredTodos"
-                        :key="todo.id"
+                        :key="`todo-${todo.id}`"
                         layout
                         :initial="{ opacity: 0, x: -20 }"
                         :animate="{ opacity: 1, x: 0 }"
@@ -134,7 +134,7 @@
                       </motion.li>
                     </AnimatePresence>
                   </motion.ul>
-                </LayoutGroup>
+                </div>
               </motion.div>
             </div>
           </ScrollArea>
@@ -265,9 +265,10 @@ async function updateContentHeight() {
   }
 }
 
-watch([filteredTodos, () => todosStore.loading], () => {
+// Исправление бага с высотой - добавляем flush: 'post' для обновления после рендера
+watch([filteredTodos, () => todosStore.loading, query, priority, sort], () => {
   updateContentHeight()
-}, { immediate: true })
+}, { immediate: true, flush: 'post' })
 
 onMounted(() => {
   todosStore.fetchTodos()
