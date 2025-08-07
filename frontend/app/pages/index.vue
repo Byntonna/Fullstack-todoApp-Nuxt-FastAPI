@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-8">
-    <!-- Заголовок + счётчики -->
+    <!-- Title + counters -->
     <section>
       <h1 class="text-3xl font-bold tracking-tight">{{ greeting }}</h1>
       <p class="text-sm text-muted-foreground mt-3">
@@ -9,21 +9,21 @@
       <Button class="mt-4" @click="openCreate">{{ t('todo.add') }}</Button>
     </section>
 
-    <!-- Фильтры / сортировка + кнопки экспорта -->
+    <!-- Filters / sort + export buttons -->
     <Card class="p-4">
       <div class="flex flex-wrap gap-4 items-end justify-between">
         <div class="flex flex-wrap gap-4 items-end">
-          <!-- Поиск -->
+          <!-- Search -->
           <Input v-model="query" :placeholder="t('todo.search')" class="w-64" />
 
-          <!-- Приоритет -->
+          <!-- Priority -->
           <ToggleGroup v-model="priority" type="multiple">
             <ToggleGroupItem value="P1">P1</ToggleGroupItem>
             <ToggleGroupItem value="P2">P2</ToggleGroupItem>
             <ToggleGroupItem value="P3">P3</ToggleGroupItem>
           </ToggleGroup>
 
-          <!-- Сортировка -->
+          <!-- Sort -->
           <Select v-model="sort">
             <SelectTrigger class="w-40">
               <SelectValue :placeholder="t('todo.sort')" />
@@ -38,14 +38,14 @@
           <Button variant="ghost" @click="resetFilters">{{ t('todo.reset') }}</Button>
         </div>
 
-        <!-- Кнопки экспорта -->
+        <!-- Export buttons -->
         <div class="flex gap-2">
           <Button variant="outline" @click="exportCsv">
-            <Icon name="radix-icons:download" class="mr-2 h-4 w-4" style="color: currentColor"/>
+            <Icon name="icons:save" class="mr-2 h-4 w-4" style="color: currentColor"/>
             {{ t('todo.export_csv') }}
           </Button>
           <Button variant="outline" @click="exportAnki">
-            <Icon name="radix-icons:star" class="mr-2 h-4 w-4 rotate-[-15deg]" style="color: currentColor"/>
+            <Icon name="icons:anki" class="mr-2 h-4 w-4 rotate-[-15deg]" style="color: currentColor"/>
             {{ t('todo.export_anki') }}
           </Button>
         </div>
@@ -68,7 +68,6 @@
       />
     </Modal>
 
-    <!-- Переключатель видов с улучшенной анимацией -->
     <div class="relative">
       <Tabs v-model="view" class="relative">
         <TabsList class="mb-6 relative grid w-80 grid-cols-2 mx-auto bg-muted p-1 rounded-lg">
@@ -90,9 +89,8 @@
       </Tabs>
     </div>
 
-        <!-- Контейнер для основного содержимого с фиксированной минимальной высотой -->
     <div class="relative min-h-[400px]">
-      <!-- Анимированный переход для вида "Список" -->
+      <!-- Animated transition for List view -->
       <Transition
         name="view-transition"
         mode="out-in"
@@ -129,7 +127,6 @@
               {{ t('todo.no_results') }}
             </p>
             <div v-else class="space-y-4">
-              <!-- Используем displayTodos для плавного обновления при фильтрации/сортировке -->
               <TransitionGroup
                 name="list-item"
                 tag="div"
@@ -154,7 +151,7 @@
         </div>
       </Transition>
 
-      <!-- Анимированный переход для вида "Календарь" -->
+      <!-- Animated transition for the Calendar view -->
       <Transition
         name="view-transition"
         mode="out-in"
@@ -232,7 +229,7 @@ const { t } = useI18n()
 const todosStore = useTodosStore()
 
 /**
- * локальные состояния
+ * local states
  */
 const query = ref('')
 const priority = ref<string[]>([])
@@ -248,7 +245,7 @@ const contentHeight = ref('200px')
 const listAnimationKey = ref(0)
 
 /**
- * вычисления
+ * compute
  */
 const filteredTodos = computed(() =>
   todosStore.filterAndSort({ query: query.value, priority: priority.value, sort: sort.value })
@@ -303,7 +300,7 @@ function onListEnter(el: Element) {
 
 function onListLeave(el: Element) {
   const htmlEl = el as HTMLElement;
-  // Если уходит список, он сдвигается влево
+  // If the list leaves, it shifts to the left
   htmlEl.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
   htmlEl.style.position = 'absolute';
   htmlEl.style.width = '100%';
@@ -315,11 +312,11 @@ function onListLeave(el: Element) {
 function onListAfterEnter() {
 }
 
-// Анимации переходов для вида "Календарь"
+// Transition animations for the Calendar view
 function onCalendarEnter(el: Element) {
   const htmlEl = el as HTMLElement;
   htmlEl.style.opacity = '0';
-  htmlEl.style.transform = 'translateX(30px)'; // Календарь появляется справа
+  htmlEl.style.transform = 'translateX(30px)'; // The calendar appears on the right
   htmlEl.style.position = 'absolute';
   htmlEl.style.width = '100%';
   htmlEl.style.zIndex = '1';
@@ -333,7 +330,7 @@ function onCalendarEnter(el: Element) {
 
 function onCalendarLeave(el: Element) {
   const htmlEl = el as HTMLElement;
-  // Если уходит календарь, он сдвигается вправо
+  // If the calendar moves away, it moves to the right
   htmlEl.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
   htmlEl.style.position = 'absolute';
   htmlEl.style.width = '100%';
@@ -343,26 +340,26 @@ function onCalendarLeave(el: Element) {
 }
 
 function onCalendarAfterEnter() {
-  // Нет необходимости обновлять listAnimationKey здесь
+  // No need to update listAnimationKey here
 }
-// Отслеживание изменений для обновления списка
+// Track changes to update the list
 watch(filteredTodos, () => {
   updateContentHeight()
 }, { immediate: true, deep: true })
 
-// Отслеживание загрузки
+// Loading tracking
 watch(() => todosStore.loading, () => {
   updateContentHeight()
 })
 
-// Инициализация
+// Init
 onMounted(async () => {
   await todosStore.fetchTodos()
   updateContentHeight()
 })
 
 /**
- * методы
+ * methods
  */
 function resetFilters() {
   query.value = ''

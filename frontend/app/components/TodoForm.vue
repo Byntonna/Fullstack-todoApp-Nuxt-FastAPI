@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch } from 'vue'
+import { watch, ref, computed } from 'vue'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -16,6 +16,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Button } from '@/components/ui/button'
 import { useI18n } from '#imports'
+import { DateFormatter, getLocalTimeZone, parseDate, today } from '@internationalized/date'
+import { toDate } from 'reka-ui/date'
+import { Calendar } from '@/components/ui/calendar'
+import { PopoverRoot as Popover, PopoverTrigger, PopoverContent } from 'reka-ui'
+import { CalendarIcon } from 'lucide-vue-next'
 
 type Priority = 'P1' | 'P2' | 'P3'
 
@@ -96,6 +101,9 @@ const onSubmit = form.handleSubmit((values) => {
     tags: values.tags ? values.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
   })
 })
+const df = new DateFormatter('en-US', { dateStyle: 'long' })
+const placeholder = ref()
+const dueValue = computed(() => form.values.due_date ? parseDate(form.values.due_date) : undefined)
 const { t } = useI18n()
 </script>
 
@@ -212,16 +220,43 @@ const { t } = useI18n()
 
     <!-- Срок (due_date) -->
     <FormField v-slot="{ componentField }" name="due_date">
-      <FormItem>
+      <FormItem class="flex flex-col">
         <FormLabel>{{ t('todoform.due_date') }}</FormLabel>
-        <FormControl>
-          <!-- Можно заменить на ready-made date-picker, если есть -->
-          <Input
-            type="date"
-            :disabled="props.loading"
-            v-bind="componentField"
-          />
-        </FormControl>
+        <Popover>
+          <PopoverTrigger as-child>
+            <FormControl>
+              <Button
+                variant="outline"
+                :class="['w-[240px] ps-3 text-start font-normal', !dueValue && 'text-muted-foreground']"
+                :disabled="props.loading"
+              >
+                <span>{{ dueValue ? df.format(toDate(dueValue)) : 'Pick a date' }}</span>
+                <CalendarIcon class="ms-auto h-4 w-4 opacity-50" />
+              </Button>
+              <input hidden v-bind="componentField" />
+            </FormControl>
+          </PopoverTrigger>
+          <PopoverContent
+            class="w-auto p-0 bg-popover rounded-md border"
+            @mousedown.capture.stop
+            @click.stop
+          >
+            <Calendar
+              v-model:placeholder="placeholder"
+              :model-value="dueValue"
+              calendar-label="Due date"
+              initial-focus
+              :min-value="today(getLocalTimeZone())"
+              @update:model-value="(v) => {
+                if (v) {
+                  form.setFieldValue('due_date', v.toString())
+                } else {
+                  form.setFieldValue('due_date', null)
+                }
+              }"
+            />
+          </PopoverContent>
+        </Popover>
         <FormMessage/>
       </FormItem>
     </FormField>

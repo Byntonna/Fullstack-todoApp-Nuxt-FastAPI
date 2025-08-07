@@ -86,10 +86,10 @@
     <!-- Actions -->
     <div class="flex gap-2 flex-shrink-0">
       <Button size="sm" variant="outline" @click="$emit('edit', todo)">
-        <Icon name="radix-icons:pencil-1" size="20" style="color: currentColor" />
+        <Icon name="icons:todo-edit" size="20" style="color: currentColor" />
       </Button>
       <Button size="sm" variant="destructive" @click="$emit('delete', todo.id)">
-        <Icon name="radix-icons:trash" size="20" style="color: currentColor" />
+        <Icon name="icons:todo-delete" size="20" style="color: currentColor" />
       </Button>
     </div>
   </div>

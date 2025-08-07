@@ -3,16 +3,12 @@
     <!-- Top bar -->
     <header class="border-b border-border">
       <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-        <!-- Логотип -->
+        <!-- Logo -->
         <NuxtLink to="/" class="font-semibold tracking-tight text-lg">
           TodoApp
         </NuxtLink>
 
         <div class="flex items-center gap-4">
-          <!-- Переключатель темы -->
-          <div>
-            <!-- <ModeToggle /> -->
-          </div>
 
           <!-- User / logout -->
           <div v-if="authStore.user">
@@ -37,9 +33,9 @@
 
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger class="flex items-center">
-                    <Icon name="radix-icons:sun"
+                    <Icon name="icons:sun"
                           class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                    <Icon name="radix-icons:moon"
+                    <Icon name="icons:moon"
                           class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                     <span class="ml-2">{{ t('common.theme') }}</span>
                   </DropdownMenuSubTrigger>
@@ -68,7 +64,7 @@
 
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger class="flex items-center">
-                    <Icon name="radix-icons:globe" class="h-[1.2rem] w-[1.2rem]" />
+                    <Icon name="icons:language" class="h-[1.2rem] w-[1.2rem]" />
                     <span class="ml-2">{{ t('common.language') }}</span>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent align="start">
@@ -90,7 +86,7 @@
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem class="cursor-pointer" @click="logout">
-                  <Icon name="radix-icons:exit" class="mr-2 h-4 w-4" />
+                  <Icon name="icons:logout" class="mr-2 h-4 w-4" />
                   {{ t('common.logout') }}
                 </DropdownMenuItem>
               </DropdownMenuContent>

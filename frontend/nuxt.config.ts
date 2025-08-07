@@ -26,6 +26,15 @@ export default defineNuxtConfig({
     componentDir: './app/components/ui'
   },
 
+  icon: {
+    customCollections: [
+      {
+        prefix: 'icons',
+        dir: './app/assets/icons'
+      },
+    ],
+  },
+
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8000'
