@@ -24,7 +24,12 @@
           </ToggleGroup>
 
           <!-- Category -->
-          <CategoryFilter v-model="selectedCategoryId" :categories="categoriesStore.categories" />
+          <div class="flex items-center gap-2">
+            <CategoryFilter v-model="selectedCategoryId" :categories="categoriesStore.categories" />
+            <Button variant="outline" size="icon" @click="showCategoryForm = true">
+              <Icon name="icons:plus" class="h-4 w-4" style="color: currentColor"/>
+            </Button>
+          </div>
 
           <!-- Sort -->
           <Select v-model="sort">
@@ -69,6 +74,15 @@
         :categories="categoriesStore.categories"
         @submit="handleSubmit"
         @cancel="cancelEdit"
+        @add-category="showCategoryForm = true"
+      />
+    </Modal>
+
+    <Modal v-model="showCategoryForm">
+      <CategoryForm
+        :loading="categoryLoading"
+        @submit="handleCategorySubmit"
+        @cancel="showCategoryForm = false"
       />
     </Modal>
 
@@ -241,7 +255,6 @@ import { useTodosStore } from '~/stores/todos'
 import type { Todo } from '~/stores/todos'
 import { useCategoriesStore } from '~/stores/categories'
 import Modal from '@/components/Modal.vue'
-import { debounce } from 'lodash-es'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -261,6 +274,8 @@ const formLoading = ref(false)
 const showForm = ref(false)
 const selectedDate = ref<Date | null>(null)
 const selectedCategoryId = ref<number | null>(null)
+const showCategoryForm = ref(false)
+const categoryLoading = ref(false)
 
 const contentContainer = ref<HTMLElement>()
 const contentHeight = ref('200px')
@@ -445,6 +460,17 @@ function cancelEdit() {
   showForm.value = false
 }
 
+async function handleCategorySubmit(data: { name: string; color: string }) {
+  categoryLoading.value = true
+  const res = await categoriesStore.createCategory(data.name, data.color)
+  categoryLoading.value = false
+  if (res.success) {
+    showCategoryForm.value = false
+  } else if (res.error) {
+    toast(res.error)
+  }
+}
+
 async function deleteTodo(id: number) {
   const result = await todosStore.deleteTodo(id)
   if (result.success && result.todo) {
@@ -467,7 +493,7 @@ async function deleteTodo(id: number) {
   }
 }
 
-function onDateChange(info: any) {
+function onDateChange(info: { event: { id: number; startStr: string } }) {
   todosStore.updateTodo(info.event.id, { due_date: info.event.startStr })
 }
 

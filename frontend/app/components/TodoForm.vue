@@ -28,6 +28,7 @@ import { toDate } from 'reka-ui/date'
 import { Calendar } from '@/components/ui/calendar'
 import { PopoverRoot as Popover, PopoverTrigger, PopoverContent } from 'reka-ui'
 import { CalendarIcon } from 'lucide-vue-next'
+import type { CategoryItem } from '~/stores/categories'
 
 type Priority = 'P1' | 'P2' | 'P3'
 
@@ -41,6 +42,7 @@ const props = defineProps<{
     tags?: string[]
   } | null
   loading: boolean
+  categories: CategoryItem[]
 }>()
 
 const emit = defineEmits<{
@@ -52,7 +54,7 @@ const emit = defineEmits<{
     category_id?: number
     tags: string[]
   }): void
-  (e: 'cancel'): void
+  (e: 'cancel' | 'add-category'): void
 }>()
 
 /* -------------------  ВАЛИДАЦИЯ  ------------------- */
@@ -153,22 +155,35 @@ const { t } = useI18n()
       <FormItem>
         <FormLabel>Категория</FormLabel>
         <FormControl>
-          <Select v-bind="componentField">
-            <SelectTrigger class="w-full">
-              <SelectValue placeholder="Без категории" />
-            </SelectTrigger>
-            <SelectContent>
-              <!-- Теперь непустая строка -->
-              <SelectItem value="none">Без категории</SelectItem>
-              <SelectItem
-                v-for="cat in props.categories"
-                :key="cat.id"
-                :value="String(cat.id)"
-              >
-                {{ cat.name }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          <div class="flex items-center gap-2">
+            <Select
+              :model-value="componentField.value?.toString() || 'none'"
+              @update:model-value="val => componentField.onChange(val === 'none' ? null : Number(val))"
+            >
+              <SelectTrigger class="w-full">
+                <SelectValue placeholder="Без категории" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Без категории</SelectItem>
+                <SelectItem
+                  v-for="cat in props.categories"
+                  :key="cat.id"
+                  :value="String(cat.id)"
+                >
+                  {{ cat.name }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              :disabled="props.loading"
+              @click="$emit('add-category')"
+            >
+              <Icon name="icons:plus" class="h-4 w-4" />
+            </Button>
+          </div>
         </FormControl>
         <FormMessage/>
       </FormItem>
