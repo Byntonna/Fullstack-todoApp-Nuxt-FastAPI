@@ -130,7 +130,7 @@ async function toggleComplete() {
   if (isToggling.value) return
   try {
     isToggling.value = true
-    await todosStore.toggleTodo(todo.id)
+    await todosStore.toggleTodo(todo.value.id)
   } catch (e) {
     console.error('Не удалось переключить задачу', e)
   } finally {
