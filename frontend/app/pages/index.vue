@@ -137,7 +137,7 @@
                 :key="listAnimationKey"
               >
                 <div
-                  v-for="(todo, index) in displayTodos"
+                  v-for="(todo, index) in filteredTodos"
                   :key="todo.id"
                   class="list-todo-item"
                   :style="{ '--index': index }"
@@ -246,8 +246,6 @@ const selectedDate = ref<Date | null>(null)
 const contentContainer = ref<HTMLElement>()
 const contentHeight = ref('200px')
 const listAnimationKey = ref(0)
-const isViewTransitioning = ref(false)
-const prevView = ref<'list' | 'calendar'>('list')
 
 /**
  * вычисления
@@ -255,19 +253,6 @@ const prevView = ref<'list' | 'calendar'>('list')
 const filteredTodos = computed(() =>
   todosStore.filterAndSort({ query: query.value, priority: priority.value, sort: sort.value })
 )
-
-// Отображаемые todos с учетом переходов между видами
-const displayTodos = computed(() => {
-  // Если переходим между видами, показываем пустой массив для плавной анимации
-  if (isViewTransitioning.value) {
-    return []
-  }
-  return filteredTodos.value
-})
-
-watch(view, (newVal, oldVal) => {
-  prevView.value = oldVal
-})
 
 const calendarEvents = computed(() =>
   filteredTodos.value.map(t => ({
@@ -317,7 +302,6 @@ function onListEnter(el: Element) {
 }
 
 function onListLeave(el: Element) {
-  isViewTransitioning.value = true;
   const htmlEl = el as HTMLElement;
   // Если уходит список, он сдвигается влево
   htmlEl.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
@@ -329,9 +313,6 @@ function onListLeave(el: Element) {
 }
 
 function onListAfterEnter() {
-  isViewTransitioning.value = false;
-  // Обновляем ключ анимации для списка
-  listAnimationKey.value++;
 }
 
 // Анимации переходов для вида "Календарь"
@@ -351,7 +332,6 @@ function onCalendarEnter(el: Element) {
 }
 
 function onCalendarLeave(el: Element) {
-  isViewTransitioning.value = true;
   const htmlEl = el as HTMLElement;
   // Если уходит календарь, он сдвигается вправо
   htmlEl.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
@@ -363,7 +343,6 @@ function onCalendarLeave(el: Element) {
 }
 
 function onCalendarAfterEnter() {
-  isViewTransitioning.value = false;
   // Нет необходимости обновлять listAnimationKey здесь
 }
 // Отслеживание изменений для обновления списка
