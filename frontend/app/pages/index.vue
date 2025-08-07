@@ -23,6 +23,9 @@
             <ToggleGroupItem value="P3">P3</ToggleGroupItem>
           </ToggleGroup>
 
+          <!-- Category -->
+          <CategoryFilter v-model="selectedCategoryId" :categories="categoriesStore.categories" />
+
           <!-- Sort -->
           <Select v-model="sort">
             <SelectTrigger class="w-40">
@@ -59,10 +62,11 @@
           description: editingTodo.description,
           priority: editingTodo.priority,
           due_date: editingTodo.due_date,
-          category: editingTodo.category?.name || '',
+          category_id: editingTodo.category?.id ?? null,
           tags: editingTodo.tags?.map(t => t.name) || []
         } : null"
         :loading="formLoading"
+        :categories="categoriesStore.categories"
         @submit="handleSubmit"
         @cancel="cancelEdit"
       />
@@ -126,26 +130,41 @@
             >
               {{ t('todo.no_results') }}
             </p>
-            <div v-else class="space-y-4">
-              <TransitionGroup
-                name="list-item"
-                tag="div"
-                class="space-y-4"
-                :key="listAnimationKey"
+            <div v-else class="space-y-6">
+              <div
+                v-for="(todos, key) in groupedTodos"
+                :key="key"
+                class="space-y-2"
               >
-                <div
-                  v-for="(todo, index) in filteredTodos"
-                  :key="todo.id"
-                  class="list-todo-item"
-                  :style="{ '--index': index }"
+                <h3 class="font-medium flex items-center gap-2">
+                  <span
+                    v-if="key !== 'none'"
+                    class="w-3 h-3 rounded-full"
+                    :style="{ backgroundColor: categoriesStore.categories.find(c => c.id === Number(key))?.color || '#ccc' }"
+                  ></span>
+                  {{ key !== 'none' ? categoriesStore.categories.find(c => c.id === Number(key))?.name : t('todoform.category_none') }}
+                  <span class="text-sm text-muted-foreground">{{ todos.length }}</span>
+                </h3>
+                <TransitionGroup
+                  name="list-item"
+                  tag="div"
+                  class="space-y-4"
+                  :key="key"
                 >
-                  <TodoItem
-                    :todo="todo"
-                    @edit="startEdit"
-                    @delete="deleteTodo"
-                  />
-                </div>
-              </TransitionGroup>
+                  <div
+                    v-for="(todo, index) in todos"
+                    :key="todo.id"
+                    class="list-todo-item"
+                    :style="{ '--index': index }"
+                  >
+                    <TodoItem
+                      :todo="todo"
+                      @edit="startEdit"
+                      @delete="deleteTodo"
+                    />
+                  </div>
+                </TransitionGroup>
+              </div>
             </div>
           </div>
         </div>
@@ -220,6 +239,7 @@ import { SelectTrigger, SelectItem, SelectValue, SelectContent, Select } from "~
 import { useI18n } from '#imports'
 import { useTodosStore } from '~/stores/todos'
 import type { Todo } from '~/stores/todos'
+import { useCategoriesStore } from '~/stores/categories'
 import Modal from '@/components/Modal.vue'
 import { debounce } from 'lodash-es'
 
@@ -227,6 +247,7 @@ definePageMeta({ middleware: 'auth' })
 
 const { t } = useI18n()
 const todosStore = useTodosStore()
+const categoriesStore = useCategoriesStore()
 
 /**
  * local states
@@ -239,17 +260,30 @@ const editingTodo = ref<Todo | null>(null)
 const formLoading = ref(false)
 const showForm = ref(false)
 const selectedDate = ref<Date | null>(null)
+const selectedCategoryId = ref<number | null>(null)
 
 const contentContainer = ref<HTMLElement>()
 const contentHeight = ref('200px')
-const listAnimationKey = ref(0)
 
 /**
  * compute
  */
-const filteredTodos = computed(() =>
-  todosStore.filterAndSort({ query: query.value, priority: priority.value, sort: sort.value })
-)
+const filteredTodos = computed(() => {
+  const base = todosStore.filterAndSort({ query: query.value, priority: priority.value, sort: sort.value })
+  return selectedCategoryId.value
+    ? base.filter(t => t.category?.id === selectedCategoryId.value)
+    : base
+})
+
+const groupedTodos = computed(() => {
+  const groups: Record<string, Todo[]> = {}
+  for (const todo of filteredTodos.value) {
+    const key = todo.category ? String(todo.category.id) : 'none'
+    if (!groups[key]) groups[key] = []
+    groups[key].push(todo)
+  }
+  return groups
+})
 
 const calendarEvents = computed(() =>
   filteredTodos.value.map(t => ({
@@ -354,7 +388,7 @@ watch(() => todosStore.loading, () => {
 
 // Init
 onMounted(async () => {
-  await todosStore.fetchTodos()
+  await Promise.all([todosStore.fetchTodos(), categoriesStore.fetchCategories()])
   updateContentHeight()
 })
 
@@ -377,12 +411,26 @@ function startEdit(todo: Todo) {
   showForm.value = true
 }
 
-async function handleSubmit(data: { title: string; description?: string; priority: 'P1' | 'P2' | 'P3'; due_date?: string | null; category?: string; tags: string[] }) {
+async function handleSubmit(data: { title: string; description?: string; priority: 'P1' | 'P2' | 'P3'; due_date?: string | null; category_id?: number; tags: string[] }) {
   formLoading.value = true
   try {
     const result = editingTodo.value
-      ? await todosStore.updateTodo(editingTodo.value.id, data)
-      : await todosStore.createTodo(data.title, data.description, data.priority, data.due_date, data.category, data.tags)
+      ? await todosStore.updateTodo(editingTodo.value.id, {
+          title: data.title,
+          description: data.description,
+          priority: data.priority,
+          due_date: data.due_date,
+          category_id: data.category_id ?? null,
+          tags: data.tags,
+        })
+      : await todosStore.createTodo(
+          data.title,
+          data.description,
+          data.priority,
+          data.due_date,
+          data.category_id,
+          data.tags,
+        )
     if (result.success) {
       editingTodo.value = null
       showForm.value = false
@@ -410,7 +458,7 @@ async function deleteTodo(id: number) {
             t.description,
             t.priority ?? 'P3',
             t.due_date ?? null,
-            t.category?.name,
+            t.category?.id,
             t.tags?.map(tag => tag.name) ?? [],
           )
         }

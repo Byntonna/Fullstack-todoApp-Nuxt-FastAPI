@@ -11,6 +11,13 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
@@ -30,7 +37,7 @@ const props = defineProps<{
     description?: string
     priority?: Priority
     due_date?: string | null
-    category?: string | null
+    category_id?: number | null
     tags?: string[]
   } | null
   loading: boolean
@@ -42,7 +49,7 @@ const emit = defineEmits<{
     description?: string
     priority: Priority
     due_date?: string | null
-    category?: string
+    category_id?: number
     tags: string[]
   }): void
   (e: 'cancel'): void
@@ -56,7 +63,7 @@ const formSchema = toTypedSchema(
     priority:    z.enum(['P1', 'P2', 'P3']).default('P3'),
     // «date» валидируется как строка ISO-формата «YYYY-MM-DD»
     due_date:    z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
-    category:    z.string().optional(),
+    category_id: z.number().optional().nullable(),
     tags:        z.string().optional(),
   })
 )
@@ -69,7 +76,7 @@ const form = useForm({
     description: props.editingTodo?.description ?? '',
     priority:    props.editingTodo?.priority    ?? 'P3',
     due_date:    props.editingTodo?.due_date    ?? null,
-    category:    props.editingTodo?.category    ?? '',
+    category_id: props.editingTodo?.category_id ?? null,
     tags:        props.editingTodo?.tags?.join(', ') ?? '',
   },
 })
@@ -84,7 +91,7 @@ watch(
         description: val?.description ?? '',
         priority:    val?.priority    ?? 'P3',
         due_date:    val?.due_date    ?? null,
-        category:    val?.category    ?? '',
+        category_id: val?.category_id ?? null,
         tags:        val?.tags?.join(', ') ?? '',
       },
     })
@@ -97,7 +104,7 @@ const onSubmit = form.handleSubmit((values) => {
     description: values.description || undefined,
     priority: values.priority,
     due_date: values.due_date ?? undefined,
-    category: values.category || undefined,
+    category_id: values.category_id ?? undefined,
     tags: values.tags ? values.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
   })
 })
@@ -142,16 +149,26 @@ const { t } = useI18n()
       </FormItem>
     </FormField>
 
-    <FormField v-slot="{ componentField }" name="category">
+    <FormField v-slot="{ componentField }" name="category_id">
       <FormItem>
-        <FormLabel>{{ t('todoform.category') }}</FormLabel>
+        <FormLabel>Категория</FormLabel>
         <FormControl>
-          <Input
-            type="text"
-            :placeholder="t('todoform.enter_category')"
-            :disabled="props.loading"
-            v-bind="componentField"
-          />
+          <Select v-bind="componentField">
+            <SelectTrigger class="w-full">
+              <SelectValue placeholder="Без категории" />
+            </SelectTrigger>
+            <SelectContent>
+              <!-- Теперь непустая строка -->
+              <SelectItem value="none">Без категории</SelectItem>
+              <SelectItem
+                v-for="cat in props.categories"
+                :key="cat.id"
+                :value="String(cat.id)"
+              >
+                {{ cat.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </FormControl>
         <FormMessage/>
       </FormItem>
@@ -209,6 +226,7 @@ const { t } = useI18n()
             </ToggleGroupItem>
             <ToggleGroupItem value="P3" class="rounded-r-md">
                 <Icon name="tabler:exclamation-mark"
+                    class="mb-1"
                     size="20"
                     style="color: currentColor"/>
             </ToggleGroupItem>
@@ -230,7 +248,7 @@ const { t } = useI18n()
                 :class="['w-[240px] ps-3 text-start font-normal', !dueValue && 'text-muted-foreground']"
                 :disabled="props.loading"
               >
-                <span>{{ dueValue ? df.format(toDate(dueValue)) : 'Pick a date' }}</span>
+                <span>{{ dueValue ? df.format(toDate(dueValue)) : t('todoform.datepick') }}</span>
                 <CalendarIcon class="ms-auto h-4 w-4 opacity-50" />
               </Button>
               <input hidden v-bind="componentField" />

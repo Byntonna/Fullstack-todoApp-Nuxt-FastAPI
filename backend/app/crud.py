@@ -36,21 +36,20 @@ def get_todos(db: Session, user_id: int, skip: int = 0, limit: int = 100):
     )
 
 def create_todo(db: Session, todo: schemas.TodoCreate, user_id: int):
-    data = todo.model_dump(exclude={"category", "tags"})
+    data = todo.model_dump(exclude={"tags"})
     db_todo = models.Todo(**data, user_id=user_id)
 
-    if todo.category:
+    if todo.category_id is not None:
         category = (
             db.query(models.Category)
-            .filter(models.Category.name == todo.category, models.Category.user_id == user_id)
+            .filter(
+                models.Category.id == todo.category_id,
+                models.Category.user_id == user_id,
+            )
             .first()
         )
-        if not category:
-            category = models.Category(name=todo.category, user_id=user_id)
-            db.add(category)
-            db.commit()
-            db.refresh(category)
-        db_todo.category = category
+        if category:
+            db_todo.category = category
 
     tag_objs = []
     for tag_name in todo.tags:
@@ -77,25 +76,24 @@ def update_todo(db: Session, todo_id: int, todo_update: schemas.TodoUpdate, user
     db_todo = db.query(models.Todo).filter(models.Todo.id == todo_id, models.Todo.user_id == user_id).first()
 
     if db_todo:
-        update_data = todo_update.model_dump(exclude_unset=True, exclude={"category", "tags"})
+        update_data = todo_update.model_dump(exclude_unset=True, exclude={"tags"})
         for key, value in update_data.items():
             setattr(db_todo, key, value)
 
-        if todo_update.category is not None:
-            if todo_update.category == "":
+        if "category_id" in todo_update.model_dump(exclude_unset=True):
+            if todo_update.category_id is None:
                 db_todo.category = None
             else:
                 category = (
                     db.query(models.Category)
-                    .filter(models.Category.name == todo_update.category, models.Category.user_id == user_id)
+                    .filter(
+                        models.Category.id == todo_update.category_id,
+                        models.Category.user_id == user_id,
+                    )
                     .first()
                 )
-                if not category:
-                    category = models.Category(name=todo_update.category, user_id=user_id)
-                    db.add(category)
-                    db.commit()
-                    db.refresh(category)
-                db_todo.category = category
+                if category:
+                    db_todo.category = category
 
         if todo_update.tags is not None:
             tag_objs = []
@@ -128,10 +126,17 @@ def delete_todo(db: Session, todo_id: int, user_id: int):
 
 
 def get_categories(db: Session, user_id: int):
-    return db.query(models.Category).filter(models.Category.user_id == user_id).all()
+    categories = (
+        db.query(models.Category)
+        .filter(models.Category.user_id == user_id)
+        .all()
+    )
+    for cat in categories:
+        cat.todo_count = len(cat.todos)
+    return categories
 
 
-def create_category(db: Session, name: str, user_id: int):
+def create_category(db: Session, name: str, color: str, user_id: int):
     existing = (
         db.query(models.Category)
         .filter(models.Category.name == name, models.Category.user_id == user_id)
@@ -139,10 +144,49 @@ def create_category(db: Session, name: str, user_id: int):
     )
     if existing:
         return existing
-    category = models.Category(name=name, user_id=user_id)
+    category = models.Category(name=name, color=color, user_id=user_id)
     db.add(category)
     db.commit()
     db.refresh(category)
+    return category
+
+def update_category(
+    db: Session, category_id: int, user_id: int, name: str | None = None, color: str | None = None
+):
+    category = (
+        db.query(models.Category)
+        .filter(models.Category.id == category_id, models.Category.user_id == user_id)
+        .first()
+    )
+    if category:
+        if name is not None:
+            category.name = name
+        if color is not None:
+            category.color = color
+        db.commit()
+        db.refresh(category)
+    return category
+
+
+def delete_category(
+    db: Session, category_id: int, user_id: int, new_category_id: int | None = None
+):
+    category = (
+        db.query(models.Category)
+        .filter(models.Category.id == category_id, models.Category.user_id == user_id)
+        .first()
+    )
+    if category:
+        if new_category_id:
+            db.query(models.Todo).filter(
+                models.Todo.category_id == category_id, models.Todo.user_id == user_id
+            ).update({"category_id": new_category_id})
+        else:
+            db.query(models.Todo).filter(
+                models.Todo.category_id == category_id, models.Todo.user_id == user_id
+            ).update({"category_id": None})
+        db.delete(category)
+        db.commit()
     return category
 
 

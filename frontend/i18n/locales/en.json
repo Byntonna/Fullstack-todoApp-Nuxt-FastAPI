@@ -71,9 +71,11 @@
     "due_date": "Due date",
     "category": "Category",
     "enter_category": "Enter category",
+    "category_none": "No category",
     "tags": "Tags",
     "enter_tags": "Enter tags separated by commas",
     "update": "Update",
-    "create": "Create"
+    "create": "Create",
+    "datepick": "Pick a date"
   }
 }

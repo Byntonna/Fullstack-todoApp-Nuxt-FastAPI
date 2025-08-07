@@ -60,6 +60,7 @@ class Category(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
+    color = Column(String, nullable=False, default="#ffffff")
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     todos = relationship("Todo", back_populates="category")

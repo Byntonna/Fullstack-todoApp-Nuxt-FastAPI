@@ -21,4 +21,23 @@ async def create_category(
     current_user: schemas.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db),
 ):
-    return crud.create_category(db, category.name, current_user.id)
+    return crud.create_category(db, category.name, category.color, current_user.id)
+
+@router.put("/{category_id}", response_model=schemas.Category)
+async def update_category(
+    category_id: int,
+    category: schemas.CategoryUpdate,
+    current_user: schemas.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    return crud.update_category(db, category_id, current_user.id, category.name, category.color)
+
+
+@router.delete("/{category_id}", response_model=schemas.Category)
+async def delete_category(
+    category_id: int,
+    new_category_id: int | None = None,
+    current_user: schemas.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    return crud.delete_category(db, category_id, current_user.id, new_category_id)
