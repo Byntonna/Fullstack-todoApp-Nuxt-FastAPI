@@ -103,8 +103,7 @@ const onColorInput = (e: Event) => {
       </label>
       <Input
         type="color"
-        :value="formData.color"
-        @input="onColorInput"
+        v-model="formData.color"
         :disabled="props.loading"
         class="h-10 w-16 p-1"
       />

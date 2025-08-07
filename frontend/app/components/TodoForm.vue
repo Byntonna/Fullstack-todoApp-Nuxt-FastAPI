@@ -16,6 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
   SelectContent,
+  SelectGroup,
+  SelectLabel,
   SelectItem,
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
@@ -151,43 +153,52 @@ const { t } = useI18n()
       </FormItem>
     </FormField>
 
-    <FormField v-slot="{ componentField }" name="category_id">
-      <FormItem>
-        <FormLabel>Категория</FormLabel>
-        <FormControl>
-          <div class="flex items-center gap-2">
-            <Select
-              :model-value="componentField.value?.toString() || 'none'"
-              @update:model-value="val => componentField.onChange(val === 'none' ? null : Number(val))"
-            >
-              <SelectTrigger class="w-full">
-                <SelectValue placeholder="Без категории" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Без категории</SelectItem>
-                <SelectItem
-                  v-for="cat in props.categories"
-                  :key="cat.id"
-                  :value="String(cat.id)"
-                >
-                  {{ cat.name }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              :disabled="props.loading"
-              @click="$emit('add-category')"
-            >
-              <Icon name="icons:plus" class="h-4 w-4" />
-            </Button>
-          </div>
-        </FormControl>
-        <FormMessage/>
-      </FormItem>
-    </FormField>
+    <FormField v-slot="{ }" name="category_id">
+  <FormItem>
+    <FormLabel>Категория</FormLabel>
+    <FormControl>
+      <div class="flex items-center gap-2">
+        <Select
+          :modelValue="form.values.category_id != null ? String(form.values.category_id) : undefined"
+          @update:modelValue="(v) => {
+            form.setFieldValue('category_id', !v || v === 'none' ? null : Number(v))
+          }"
+          :disabled="props.loading"
+        >
+          <SelectTrigger class="w-full h-10">
+            <SelectValue placeholder="Без категории" />
+          </SelectTrigger>
+
+          <SelectContent>
+            <SelectItem value="none">Без категории</SelectItem>
+            <SelectGroup>
+              <SelectLabel>Категории</SelectLabel>
+              <SelectItem
+                v-for="cat in props.categories"
+                :key="cat.id"
+                :value="String(cat.id)"
+              >
+                {{ cat.name }}
+              </SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          :disabled="props.loading"
+          @click="$emit('add-category')"
+        >
+          <Icon name="icons:plus" class="h-4 w-4" />
+        </Button>
+      </div>
+    </FormControl>
+    <FormMessage />
+  </FormItem>
+</FormField>
+
 
     <!-- Теги -->
     <FormField v-slot="{ componentField }" name="tags">
