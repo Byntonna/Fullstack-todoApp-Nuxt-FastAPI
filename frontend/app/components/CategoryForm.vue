@@ -1,61 +1,134 @@
 <script setup lang="ts">
-import { z } from 'zod'
-import { useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { ref, computed } from 'vue'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 const emit = defineEmits<{ submit: [data: { name: string; color: string }]; cancel: [] }>()
 const props = defineProps<{ loading?: boolean }>()
-const isValid = computed(() => meta.value.valid)
 
-const schema = toTypedSchema(
-  z.object({
-    name: z.string().min(1, 'Название обязательно'),
-    color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Неверный цвет'),
-  })
-)
-
-const { handleSubmit, meta, resetForm } = useForm({
-  validationSchema: schema,
-  initialValues: {
-    name: '',
-    color: '#000000',
-  },
+const formData = ref({
+  name: '',
+  color: '#000000'
 })
 
-const onSubmit = handleSubmit((values) => {
-  emit('submit', values)
-  resetForm()
+const errors = ref({
+  name: '',
+  color: ''
 })
+
+const validateName = (value: string) => {
+  if (!value.trim()) {
+    return 'Название обязательно'
+  }
+  return ''
+}
+
+const validateColor = (value: string) => {
+  const colorRegex = /^#[0-9A-Fa-f]{6}$/
+  if (!colorRegex.test(value)) {
+    return 'Неверный цвет'
+  }
+  return ''
+}
+
+const isValid = computed(() => {
+  const nameError = validateName(formData.value.name)
+  const colorError = validateColor(formData.value.color)
+  return !nameError && !colorError
+})
+
+const updateErrors = () => {
+  errors.value.name = validateName(formData.value.name)
+  errors.value.color = validateColor(formData.value.color)
+}
+
+const onSubmit = (e: Event) => {
+  e.preventDefault()
+  updateErrors()
+
+  if (isValid.value) {
+    emit('submit', {
+      name: formData.value.name.trim(),
+      color: formData.value.color
+    })
+    formData.value = {
+      name: '',
+      color: '#000000'
+    }
+    errors.value = {
+      name: '',
+      color: ''
+    }
+  }
+}
+
+const onCancel = () => {
+  emit('cancel')
+}
+
+const onNameInput = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  formData.value.name = target.value
+  errors.value.name = validateName(target.value)
+}
+
+const onColorInput = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  formData.value.color = target.value
+  errors.value.color = validateColor(target.value)
+}
 </script>
 
 <template>
-  <Form @submit="onSubmit" class="space-y-4">
-    <FormField name="name" v-slot="{ field, errorMessage }">
-      <FormItem>
-        <FormLabel>Название</FormLabel>
-        <FormControl>
-          <Input v-bind="field" :disabled="props.loading" placeholder="Например, Работа" />
-        </FormControl>
-        <FormMessage>{{ errorMessage }}</FormMessage>
-      </FormItem>
-    </FormField>
+  <form @submit="onSubmit" class="space-y-4">
+    <div class="space-y-2">
+      <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        Название
+      </label>
+      <Input
+        :value="formData.name"
+        @input="onNameInput"
+        :disabled="props.loading"
+        placeholder="Например, Работа"
+        class="w-full"
+      />
+      <div v-if="errors.name" class="text-sm font-medium text-red-500">
+        {{ errors.name }}
+      </div>
+    </div>
 
-    <FormField name="color" v-slot="{ field, errorMessage }">
-      <FormItem>
-        <FormLabel>Цвет</FormLabel>
-        <FormControl>
-          <Input type="color" v-bind="field" :disabled="props.loading" class="h-10 w-16 p-1" />
-        </FormControl>
-        <FormMessage>{{ errorMessage }}</FormMessage>
-      </FormItem>
-    </FormField>
+    <div class="space-y-2">
+      <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        Цвет
+      </label>
+      <Input
+        type="color"
+        :value="formData.color"
+        @input="onColorInput"
+        :disabled="props.loading"
+        class="h-10 w-16 p-1"
+      />
+      <div v-if="errors.color" class="text-sm font-medium text-red-500">
+        {{ errors.color }}
+      </div>
+    </div>
 
     <div class="flex justify-end gap-3">
-      <Button type="button" variant="ghost" @click="$emit('cancel')" :disabled="props.loading">Отмена</Button>
-      <Button type="submit" :disabled="!isValid || props.loading" :loading="props.loading">Создать</Button>
+      <Button
+        type="button"
+        variant="ghost"
+        @click="onCancel"
+        :disabled="props.loading"
+      >
+        Отмена
+      </Button>
+      <Button
+        type="submit"
+        :disabled="!isValid || props.loading"
+      >
+        <span v-if="props.loading">Создание...</span>
+        <span v-else>Создать</span>
+      </Button>
     </div>
-  </Form>
+  </form>
 </template>
