@@ -19,10 +19,20 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxtjs/color-mode',
     '@nuxtjs/i18n',
+    'motion-v/nuxt',
   ],
   shadcn: {
     prefix: '',
     componentDir: './app/components/ui'
+  },
+
+  icon: {
+    customCollections: [
+      {
+        prefix: 'icons',
+        dir: './app/assets/icons'
+      },
+    ],
   },
 
   runtimeConfig: {
