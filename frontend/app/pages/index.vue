@@ -463,7 +463,7 @@ async function confirmDelete() {
     collapsedCategories.value.delete(String(id))
     if (selectedCategoryId.value === id) selectedCategoryId.value = null
     await todosStore.fetchTodos()
-    toast(t('category.deleted') || 'Category deleted')
+    toast(t('category.deleted'))
     showDeleteModal.value = false
   } else if (res.error) {
     toast(res.error)

@@ -86,7 +86,7 @@ export const useCategoriesStore = defineStore('categories', {
       }
     },
 
-    async deleteCategory(id: number, new_category_id: number | null = null) {
+    async deleteCategory(id: number, new_category_id?: number) {
       try {
         const authStore = useAuthStore()
         const config = useRuntimeConfig()
@@ -96,7 +96,7 @@ export const useCategoriesStore = defineStore('categories', {
           headers: {
             Authorization: `Bearer ${authStore.token}`
           },
-          query: { new_category_id }
+          ...(new_category_id !== null ? { query: { new_category_id } } : {})
         })
         this.categories = this.categories.filter(c => c.id !== id)
         return { success: true, data: deleted }

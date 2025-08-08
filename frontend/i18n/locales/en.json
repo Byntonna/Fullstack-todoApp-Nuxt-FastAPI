@@ -90,6 +90,7 @@
   },
   "category": {
     "delete_title": "Delete this category?",
-    "delete_text": "This will remove “{name}”. Tasks will be uncategorized."
+    "delete_text": "This will remove “{name}”. Tasks will be uncategorized.",
+    "deleted": "Category deleted"
   }
 }
