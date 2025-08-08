@@ -299,7 +299,7 @@ import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { toast } from 'vue-sonner'
 import { ScrollArea } from "~/components/ui/scroll-area"
 import { SelectTrigger, SelectItem, SelectValue, SelectContent, Select } from "~/components/ui/select"
-import { useI18n } from '#imports'
+import { useI18n, useHead } from '#imports'
 import { useTodosStore } from '~/stores/todos'
 import type { Todo } from '~/stores/todos'
 import { useCategoriesStore } from '~/stores/categories'
@@ -381,6 +381,10 @@ const greeting = computed(() => {
   if (hour < 18) return t('greeting.day')
   return t('greeting.evening')
 })
+
+useHead(() => ({
+  title: greeting.value,
+}))
 
 async function updateContentHeight() {
   await nextTick()

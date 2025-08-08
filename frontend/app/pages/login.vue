@@ -1,12 +1,12 @@
 <!-- pages/login.vue -->
 <script setup lang="ts">
-definePageMeta({ layout: false })
-
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '~/stores/auth'
-import { useI18n } from '#imports'
+import { useI18n, useHead } from '#imports'
 import LoginForm from '@/components/LoginForm.vue'
+
+definePageMeta({ layout: false })
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -14,6 +14,10 @@ const router = useRouter()
 const loading = ref(false)
 const error = ref('')
 const { t } = useI18n()
+
+useHead(() => ({
+  title: t('login.sign_in'),
+}))
 
 async function onLogin({ email, password }: { email: string; password: string }) {
   loading.value = true
