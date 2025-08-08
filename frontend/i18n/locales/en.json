@@ -85,7 +85,8 @@
   },
   "categoryform": {
     "name": "Title",
-    "color": "Color"
+    "color": "Color",
+    "placeholder": "e.g., Work"
   },
   "category": {
     "delete_title": "Delete this category?",

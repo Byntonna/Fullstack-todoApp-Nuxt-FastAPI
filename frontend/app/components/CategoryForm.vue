@@ -76,17 +76,17 @@ const onNameInput = (e: Event) => {
 </script>
 
 <template>
-  <form @submit="onSubmit" class="space-y-4">
+  <form class="space-y-4" @submit="onSubmit">
     <div class="space-y-2">
       <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
         {{ t('categoryform.name') }}
       </label>
       <Input
         :value="formData.name"
-        @input="onNameInput"
+        :placeholder="t('categoryform.placeholder')"
         :disabled="props.loading"
-        placeholder="Например, Работа"
         class="w-full"
+        @input="onNameInput"
       />
       <div v-if="errors.name" class="text-sm font-medium text-red-500">
         {{ errors.name }}
@@ -98,8 +98,8 @@ const onNameInput = (e: Event) => {
         {{ t('categoryform.color') }}
       </label>
       <Input
-        type="color"
         v-model="formData.color"
+        type="color"
         :disabled="props.loading"
         class="h-10 w-16 p-1"
       />
@@ -112,8 +112,8 @@ const onNameInput = (e: Event) => {
       <Button
         type="button"
         variant="ghost"
-        @click="onCancel"
         :disabled="props.loading"
+        @click="onCancel"
       >
         {{ t('common.cancel') }}
       </Button>

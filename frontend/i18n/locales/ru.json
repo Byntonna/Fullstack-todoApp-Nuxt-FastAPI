@@ -85,7 +85,8 @@
   },
   "categoryform": {
     "name": "Имя",
-    "color": "Цвет"
+    "color": "Цвет",
+    "placeholder": "Например, Работа"
   },
   "category": {
     "delete_title": "Удалить эту категорию?",
