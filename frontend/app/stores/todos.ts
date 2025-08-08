@@ -5,6 +5,7 @@ import Fuse from 'fuse.js'
 export interface Category {
   id: number
   name: string
+  color: string
 }
 
 export interface Tag {
@@ -119,7 +120,7 @@ export const useTodosStore = defineStore('todos', {
       description?: string,
       priority: 'P1' | 'P2' | 'P3' = 'P3',
       due_date?: string | null,
-      category?: string,
+      category_id?: number,
       tags: string[] = [],
     ) {
       try {
@@ -133,7 +134,7 @@ export const useTodosStore = defineStore('todos', {
             Authorization: `Bearer ${authStore.token}`,
             'Content-Type': 'application/json'
           },
-          body: { title, description, priority, due_date, category, tags }
+          body: { title, description, priority, due_date, category_id, tags }
         })
 
         this.todos.unshift(newTodo) // Добавляем в начало списка
@@ -222,8 +223,10 @@ export const useTodosStore = defineStore('todos', {
 
     async updateTodo(
       id: number,
-      updates: Partial<Pick<Todo, 'title' | 'description' | 'completed' | 'priority' | 'due_date'>> & {
-        category?: string | null
+      updates: Partial<
+        Pick<Todo, 'title' | 'description' | 'completed' | 'priority' | 'due_date'>
+      > & {
+        category_id?: number | null
         tags?: string[]
       }
     ) {

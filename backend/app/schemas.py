@@ -13,7 +13,7 @@ class TodoBase(BaseModel):
     due_date: Optional[date] = None
 
 class TodoCreate(TodoBase):
-    category: Optional[str] = None
+    category_id: Optional[int] = None
     tags: List[str] = []
 
 
@@ -23,17 +23,24 @@ class TodoUpdate(TodoBase):
     completed: Optional[bool] = None
     priority: Optional[Priority] = None
     due_date: Optional[date] = None
-    category: Optional[str] = None
+    category_id: Optional[int] = None
     tags: Optional[List[str]] = None
 
 
 class CategoryCreate(BaseModel):
     name: str
+    color: str = "#ffffff"
+
+class CategoryUpdate(BaseModel):
+    name: Optional[str] = None
+    color: Optional[str] = None
 
 
 class Category(BaseModel):
     id: int
     name: str
+    color: str
+    todo_count: int = 0
 
     class Config:
         from_attributes = True

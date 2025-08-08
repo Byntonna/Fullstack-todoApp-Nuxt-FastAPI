@@ -8,7 +8,11 @@
     "language": "Language",
     "russian": "Russian",
     "english": "English",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "deleting": "Deleting...",
+    "delete": "Delete",
+    "creating": "Creating...",
+    "create": "Create"
   },
   "greeting": {
     "night": "Good night",
@@ -70,10 +74,23 @@
     "choose_priority": "Choose priority",
     "due_date": "Due date",
     "category": "Category",
+    "categories": "Categories",
     "enter_category": "Enter category",
+    "category_none": "No category",
     "tags": "Tags",
     "enter_tags": "Enter tags separated by commas",
     "update": "Update",
-    "create": "Create"
+    "create": "Create",
+    "datepick": "Pick a date"
+  },
+  "categoryform": {
+    "name": "Title",
+    "color": "Color",
+    "placeholder": "e.g., Work"
+  },
+  "category": {
+    "delete_title": "Delete this category?",
+    "delete_text": "This will remove “{name}”. Tasks will be uncategorized.",
+    "deleted": "Category deleted"
   }
 }

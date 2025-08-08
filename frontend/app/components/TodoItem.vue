@@ -53,7 +53,8 @@
       </p>
 
       <!-- Category -->
-      <p v-if="todo.category" class="text-xs mt-1 text-blue-600 dark:text-blue-300">
+      <p v-if="todo.category" class="text-xs mt-1 flex items-center gap-1">
+        <span class="w-2 h-2 rounded-full" :style="{ backgroundColor: todo.category.color }"/>
         {{ todo.category.name }}
       </p>
 
