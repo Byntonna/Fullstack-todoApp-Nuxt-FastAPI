@@ -2,9 +2,11 @@
 import { ref, computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {useI18n} from "#imports";
 
 const emit = defineEmits<{ submit: [data: { name: string; color: string }]; cancel: [] }>()
 const props = defineProps<{ loading?: boolean }>()
+const { t } = useI18n()
 
 const formData = ref({
   name: '',
@@ -71,19 +73,13 @@ const onNameInput = (e: Event) => {
   formData.value.name = target.value
   errors.value.name = validateName(target.value)
 }
-
-const onColorInput = (e: Event) => {
-  const target = e.target as HTMLInputElement
-  formData.value.color = target.value
-  errors.value.color = validateColor(target.value)
-}
 </script>
 
 <template>
   <form @submit="onSubmit" class="space-y-4">
     <div class="space-y-2">
       <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-        Название
+        {{ t('categoryform.name') }}
       </label>
       <Input
         :value="formData.name"
@@ -99,7 +95,7 @@ const onColorInput = (e: Event) => {
 
     <div class="space-y-2">
       <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-        Цвет
+        {{ t('categoryform.color') }}
       </label>
       <Input
         type="color"
@@ -119,14 +115,14 @@ const onColorInput = (e: Event) => {
         @click="onCancel"
         :disabled="props.loading"
       >
-        Отмена
+        {{ t('common.cancel') }}
       </Button>
       <Button
         type="submit"
         :disabled="!isValid || props.loading"
       >
-        <span v-if="props.loading">Создание...</span>
-        <span v-else>Создать</span>
+        <span v-if="props.loading">{{ t('common.creating') }}</span>
+        <span v-else>{{ t('common.create') }}</span>
       </Button>
     </div>
   </form>

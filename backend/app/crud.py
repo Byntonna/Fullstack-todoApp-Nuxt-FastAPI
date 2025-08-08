@@ -116,13 +116,19 @@ def update_todo(db: Session, todo_id: int, todo_update: schemas.TodoUpdate, user
     return db_todo
 
 def delete_todo(db: Session, todo_id: int, user_id: int):
-    db_todo = db.query(models.Todo).filter(models.Todo.id == todo_id, models.Todo.user_id == user_id).first()
+    db_todo = (
+        db.query(models.Todo)
+        .filter(models.Todo.id == todo_id, models.Todo.user_id == user_id)
+        .first()
+    )
 
     if db_todo:
+        todo_data = schemas.Todo.model_validate(db_todo)
         db.delete(db_todo)
         db.commit()
+        return todo_data
 
-    return db_todo
+    return None
 
 
 def get_categories(db: Session, user_id: int):

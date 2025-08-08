@@ -155,7 +155,7 @@ const { t } = useI18n()
 
     <FormField v-slot="{ }" name="category_id">
   <FormItem>
-    <FormLabel>Категория</FormLabel>
+    <FormLabel>{{ t('todoform.category') }}</FormLabel>
     <FormControl>
       <div class="flex items-center gap-2">
         <Select
@@ -166,13 +166,13 @@ const { t } = useI18n()
           :disabled="props.loading"
         >
           <SelectTrigger class="w-full h-10">
-            <SelectValue placeholder="Без категории" />
+            <SelectValue :placeholder="t('todoform.category_none')" />
           </SelectTrigger>
 
           <SelectContent>
-            <SelectItem value="none">Без категории</SelectItem>
+            <SelectItem value="none">{{ t('todoform.category_none') }}</SelectItem>
             <SelectGroup>
-              <SelectLabel>Категории</SelectLabel>
+              <SelectLabel>{{ t('todoform.categories') }}</SelectLabel>
               <SelectItem
                 v-for="cat in props.categories"
                 :key="cat.id"

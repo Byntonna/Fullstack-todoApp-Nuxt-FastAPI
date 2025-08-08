@@ -8,7 +8,11 @@
     "language": "Язык",
     "russian": "Русский",
     "english": "Английский",
-    "cancel": "Отмена"
+    "cancel": "Отмена",
+    "deleting": "Удаление...",
+    "delete": "Удалить",
+    "creating": "Создание...",
+    "create": "Создать"
   },
   "greeting": {
     "night": "Доброй ночи",
@@ -70,6 +74,7 @@
     "choose_priority": "Выберите приоритет",
     "due_date": "Срок выполнения",
     "category": "Категория",
+    "categories": "Категории",
     "enter_category": "Введите категорию",
     "category_none": "Без категории",
     "tags": "Теги",
@@ -77,5 +82,13 @@
     "update": "Обновить",
     "create": "Создать",
     "datepick": "Выберите дату"
+  },
+  "categoryform": {
+    "name": "Имя",
+    "color": "Цвет"
+  },
+  "category": {
+    "delete_title": "Удалить эту категорию?",
+    "delete_text": "Это удалит “{name}”. Задачи останутся без категории."
   }
 }

@@ -26,6 +26,14 @@
           <!-- Category -->
           <div class="flex items-center gap-2">
             <CategoryFilter v-model="selectedCategoryId" :categories="categoriesStore.categories" />
+            <Button
+              v-if="selectedCategoryId !== null"
+              variant="outline"
+              size="icon"
+              @click="openDeleteModal"
+            >
+              <Icon name="icons:minus" class="h-4 w-4" style="color: currentColor"/>
+            </Button>
             <Button variant="outline" size="icon" @click="showCategoryForm = true">
               <Icon name="icons:plus" class="h-4 w-4" style="color: currentColor"/>
             </Button>
@@ -86,6 +94,34 @@
       />
     </Modal>
 
+    <Modal v-model="showDeleteModal">
+      <div class="p-4 space-y-4">
+        <h3 class="text-lg font-semibold">
+          {{ t('category.delete_title') }}
+        </h3>
+
+        <p class="text-sm text-muted-foreground">
+          {{
+            t('category.delete_text', { name: categoryNameToDelete })
+            || ('This will remove “' + categoryNameToDelete + '”. Tasks will be uncategorized.')
+          }}
+        </p>
+
+        <div class="flex justify-end gap-2">
+          <Button variant="outline" @click="showDeleteModal = false">
+            {{ t('common.cancel') }}
+          </Button>
+          <Button
+            variant="destructive"
+            :disabled="categoryDeleting"
+            @click="confirmDelete"
+          >
+            {{ categoryDeleting ? (t('common.deleting') || 'Deleting...') : (t('common.delete') || 'Delete') }}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+
     <div class="relative">
       <Tabs v-model="view" class="relative">
         <TabsList class="mb-6 relative grid w-80 grid-cols-2 mx-auto bg-muted p-1 rounded-lg">
@@ -139,46 +175,59 @@
               {{ t('todo.no_tasks') }}
             </p>
             <p
-              v-else-if="filteredTodos.length === 0"
-              class="text-center text-muted-foreground py-12 animate-fade-in"
-            >
-              {{ t('todo.no_results') }}
-            </p>
-            <div v-else class="space-y-6">
-              <div
-                v-for="(todos, key) in groupedTodos"
-                :key="key"
-                class="space-y-2"
+                v-else-if="filteredTodos.length === 0"
+                class="text-center text-muted-foreground py-12 animate-fade-in"
               >
-                <h3 class="font-medium flex items-center gap-2">
-                  <span
-                    v-if="key !== 'none'"
-                    class="w-3 h-3 rounded-full"
-                    :style="{ backgroundColor: categoriesStore.categories.find(c => c.id === Number(key))?.color || '#ccc' }"
-                  ></span>
-                  {{ key !== 'none' ? categoriesStore.categories.find(c => c.id === Number(key))?.name : t('todoform.category_none') }}
-                  <span class="text-sm text-muted-foreground">{{ todos.length }}</span>
-                </h3>
-                <TransitionGroup
-                  name="list-item"
-                  tag="div"
-                  class="space-y-4"
-                  :key="key"
+                {{ t('todo.no_results') }}
+              </p>
+            <div v-else class="space-y-6">
+              <TransitionGroup name="list-group" tag="div" class="space-y-6">
+                <div
+                    class="space-y-2"
+                    v-for="(todos, key) in groupedTodos"
+                    :key="key"
                 >
-                  <div
-                    v-for="(todo, index) in todos"
-                    :key="todo.id"
-                    class="list-todo-item"
-                    :style="{ '--index': index }"
-                  >
-                    <TodoItem
-                      :todo="todo"
-                      @edit="startEdit"
-                      @delete="deleteTodo"
-                    />
+                  <h3 class="font-medium flex items-center justify-between">
+                    <span class="flex items-center gap-2">
+                      <span
+                        v-if="key !== 'none'"
+                        class="w-3 h-3 rounded-full"
+                        :style="{ backgroundColor: categoriesStore.categories.find(c => c.id === Number(key))?.color || '#ccc' }"
+                      ></span>
+                      {{ key !== 'none' ? categoriesStore.categories.find(c => c.id === Number(key))?.name : t('todoform.category_none') }}
+                      <span class="text-sm text-muted-foreground">{{ todos.length }}</span>
+                    </span>
+                    <button
+                      class="transition-transform duration-300"
+                      :class="{ 'rotate-180': collapsedCategories.has(key) }"
+                      @click="toggleCategory(key)"
+                    >
+                      <Icon name="icons:down" class="cursor-pointer opacity-80" size="20" style="color: currentColor"/>
+                    </button>
+                  </h3>
+                  <div v-if="!collapsedCategories.has(key)">
+                    <TransitionGroup
+                      name="list-item"
+                      tag="div"
+                      class="space-y-4"
+                      :key="key"
+                    >
+                      <div
+                        v-for="(todo, index) in todos"
+                        :key="todo.id"
+                        class="list-todo-item"
+                        :style="{ '--index': index }"
+                      >
+                        <TodoItem
+                          :todo="todo"
+                          @edit="startEdit"
+                          @delete="deleteTodo"
+                        />
+                      </div>
+                    </TransitionGroup>
                   </div>
-                </TransitionGroup>
-              </div>
+                </div>
+              </TransitionGroup>
             </div>
           </div>
         </div>
@@ -276,6 +325,15 @@ const selectedDate = ref<Date | null>(null)
 const selectedCategoryId = ref<number | null>(null)
 const showCategoryForm = ref(false)
 const categoryLoading = ref(false)
+const collapsedCategories = ref<Set<string>>(new Set())
+const showDeleteModal = ref(false)
+const categoryToDeleteId = ref<number | null>(null)
+const categoryDeleting = ref(false)
+
+const categoryNameToDelete = computed(() => {
+  const id = categoryToDeleteId.value ?? selectedCategoryId.value
+  return categoriesStore.categories.find(c => c.id === id)?.name || ''
+})
 
 const contentContainer = ref<HTMLElement>()
 const contentHeight = ref('200px')
@@ -388,6 +446,30 @@ function onCalendarLeave(el: Element) {
   htmlEl.style.transform = 'translateX(30px)';
 }
 
+function openDeleteModal() {
+  if (selectedCategoryId.value === null) return
+  categoryToDeleteId.value = selectedCategoryId.value
+  showDeleteModal.value = true
+}
+
+async function confirmDelete() {
+  if (categoryToDeleteId.value === null) return
+  categoryDeleting.value = true
+  const id = categoryToDeleteId.value
+  const res = await categoriesStore.deleteCategory(id)
+  categoryDeleting.value = false
+
+  if (res.success) {
+    collapsedCategories.value.delete(String(id))
+    if (selectedCategoryId.value === id) selectedCategoryId.value = null
+    await todosStore.fetchTodos()
+    toast(t('category.deleted') || 'Category deleted')
+    showDeleteModal.value = false
+  } else if (res.error) {
+    toast(res.error)
+  }
+}
+
 function onCalendarAfterEnter() {
   // No need to update listAnimationKey here
 }
@@ -471,6 +553,14 @@ async function handleCategorySubmit(data: { name: string; color: string }) {
   }
 }
 
+function toggleCategory(key: string) {
+  if (collapsedCategories.value.has(key)) {
+    collapsedCategories.value.delete(key)
+  } else {
+    collapsedCategories.value.add(key)
+  }
+}
+
 async function deleteTodo(id: number) {
   const result = await todosStore.deleteTodo(id)
   if (result.success && result.todo) {
@@ -536,6 +626,28 @@ function exportAnki() {
 
 .list-todo-item {
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.list-group-enter-active {
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.list-group-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.list-group-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.list-group-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.list-group-move {
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Анимации для элементов календаря */
