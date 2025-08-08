@@ -3,6 +3,14 @@
 # Todo Fullstack App
 [Русская версия](#русская-версия) | [English Version](#english-version)
 
+## 🌐 Live Demo 
+[![Vercel Deploy](https://img.shields.io/badge/Demo-Vercel-%23007ACC?logo=vercel)](https://byntonna-todoapp.vercel.app)
+
+![Nuxt](https://img.shields.io/badge/Nuxt-v4-00DC82?logo=nuxtdotjs&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0D9A6F?logo=fastapi&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+
 ## Русская версия
 Современное fullstack приложение для управления задачами, построенное с использованием Nuxt v4, FastAPI
 и PostgreSQL.
