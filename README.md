@@ -110,7 +110,7 @@ docker run -d \
   postgres:15
 
 # Запуск сервера
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+gunicorn app.main:app --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --reload
 ```
 
 ##### Frontend
@@ -242,7 +242,7 @@ docker run -d \
   postgres:15
 
 # Start server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+gunicorn app.main:app --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --reload
 ```
 
 ##### Frontend
