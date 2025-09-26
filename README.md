@@ -19,13 +19,10 @@
 - Аутентификация и авторизация с JWT токенами
 - Короткие access токены (1 час) и refresh токены на 6 месяцев с автоматическим продлением
 - Адаптивный дизайн с shadcn/vue
-- Real-time обновления (опционально с WebSocket)
 - Категории и теги для задач
-- TypeScript для типобезопасности
 - Docker для легкого развертывания
 - Безопасность с хешированием паролей
 - Валидация данных на всех уровнях
-- Обработка ошибок и пользовательские уведомления
 
 ### Архитектура
 ```
@@ -151,13 +148,10 @@ A modern fullstack task management application built with Nuxt v4, FastAPI and P
 - Authentication and authorization with JWT tokens
 - Short-lived access tokens (1 hour) and refresh tokens for 6 months with automatic renewal
 - Responsive design with shadcn/vue
-- Real-time updates (optional via WebSocket)
 - Categories and tags for tasks
-- TypeScript for type safety
 - Docker for easy deployment
 - Security with password hashing
 - Data validation at every level
-- Error handling and user notifications
 
 ### Architecture
 ```
